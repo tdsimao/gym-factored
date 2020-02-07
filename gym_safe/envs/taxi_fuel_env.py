@@ -50,7 +50,7 @@ class TaxiFuelEnv(discrete.DiscreteEnv):
     """
     metadata = {'render.modes': ['human', 'ansi']}
 
-    def __init__(self, penalty_fuel_below_min_level, min_fuel_level, fuel_capacity):
+    def __init__(self, penalty_fuel_below_min_level=0, min_fuel_level=0, fuel_capacity=14):
         self.desc = np.asarray(MAP, dtype='c')
 
         self.locs = locs = [(0, 0), (0, 4), (4, 0), (4, 3)]
@@ -118,10 +118,15 @@ class TaxiFuelEnv(discrete.DiscreteEnv):
                                 if new_fuel < min_fuel_level:
                                     reward -= penalty_fuel_below_min_level
 
+                                if pass_idx == dest_idx or fuel == 0:
+                                    reward = 0
+                                    new_row, new_col, new_pass_idx, new_fuel = row, col, pass_idx, fuel
+                                    done = True
+
                                 newstate = self.encode(new_row, new_col, new_pass_idx, dest_idx, new_fuel)
                                 P[state][a].append((1.0, newstate, reward, done))
-                isd /= isd.sum()
-                discrete.DiscreteEnv.__init__(self, nS, nA, P, isd)
+        isd /= isd.sum()
+        discrete.DiscreteEnv.__init__(self, nS, nA, P, isd)
 
     def encode(self, taxirow, taxicol, passloc, destidx, fuel):
         # (5) 5, 5, 4, 3, fuel_capacity
@@ -160,7 +165,7 @@ class TaxiFuelEnv(discrete.DiscreteEnv):
         def ul(x):
             return "_" if x == " " else x
 
-        out[1 + self.fuel_location[0]][2 * self.fuel_location[1] + 1]= "*"
+        out[1 + self.fuel_location[0]][2 * self.fuel_location[1] + 1]= "F"
 
         if passidx < 4:
             out[1 + taxirow][2 * taxicol + 1] = utils.colorize(out[1 + taxirow][2 * taxicol + 1], 'yellow',
