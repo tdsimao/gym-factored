@@ -1,3 +1,5 @@
-__pycache__/
+__pycache__
 gym_safe.egg-info
 Pipfile
+Pipfile.lock
+.idea
