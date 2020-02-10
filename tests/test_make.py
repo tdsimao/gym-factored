@@ -5,7 +5,7 @@ import gym
 class TestMakeEnvs(unittest.TestCase):
     @classmethod
     def setUp(self) -> None:
-        self.env = gym.make("chain-v0")
+        self.env = gym.make("gym_safe:chain-v0")
         self.env.reset()
 
     def test_make_chain_env(self):
