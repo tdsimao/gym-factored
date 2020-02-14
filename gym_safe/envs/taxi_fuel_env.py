@@ -81,8 +81,7 @@ class TaxiFuelEnv(discrete.DiscreteEnv):
                                 done = False
                                 taxiloc = (row, col)
 
-                                if a < 4:
-                                    new_fuel -= 1
+                                new_fuel -= 1
 
                                 if a == 0:
                                     new_row = min(row + 1, maxR)
