@@ -3,6 +3,7 @@ from six import StringIO
 from gym import utils
 from gym.envs.toy_text import discrete
 import numpy as np
+from itertools import product
 
 MAPS = {
     "5x5": [
@@ -74,84 +75,83 @@ class TaxiFuelEnv(discrete.DiscreteEnv):
     metadata = {'render.modes': ['human', 'ansi']}
 
     def __init__(self, fuel_capacity=14, map_name="5x5"):
+        assert map_name in MAPS.keys(), "map_name {} is invalid.\nValid names: {}".format(map_name, ", ".join(MAPS.keys()))
         self.desc = np.asarray(MAPS[map_name], dtype='c')
 
         self.locs = locs = [(0, 0), (0, 4), (4, 0), (4, 3)]
         self.fuel_capacity = fuel_capacity
         self.fuel_location = (3, 2)
 
-        nS = 500 * fuel_capacity
-        nR = 5
-        nC = 5
+        nR, nC = map_name.split('x')
+        self.nR, self.nC = nR, nC = int(nR), int(nC)
+        min_starting_fuel = 2 + (nR - 3) + (nC - 3)
+
+        nS = nR * nC * (len(locs) + 1) * len(locs) * fuel_capacity
         maxR = nR - 1
         maxC = nC - 1
         isd = np.zeros(nS)
         nA = 7
         P = {s: {a: [] for a in range(nA)} for s in range(nS)}
-        for row in range(nR):
-            for col in range(nC):
-                for pass_idx in range(len(locs) + 1):
-                    for dest_idx in range(len(locs)):
-                        for fuel in range(fuel_capacity):
-                            state = self.encode(row, col, pass_idx, dest_idx, fuel)
-                            if pass_idx < 4 and pass_idx != dest_idx and fuel >= 6:
-                                isd[state] += 1
-                            for a in range(nA):
-                                new_row, new_col, new_pass_idx, new_fuel = row, col, pass_idx, fuel
-                                reward = -1
-                                done = False
-                                taxiloc = (row, col)
-                                new_fuel -= 1
+        for state in range(nS):
+            row, col, pass_idx, dest_idx, fuel = self.decode(state)
+            if pass_idx < 4 and pass_idx != dest_idx and fuel >= min_starting_fuel:
+                isd[state] += 1
+            for a in range(nA):
+                new_row, new_col, new_pass_idx, new_fuel = row, col, pass_idx, fuel
+                reward = -1
+                done = False
+                taxiloc = (row, col)
+                new_fuel -= 1
 
-                                if a == 0:
-                                    new_row = min(row + 1, maxR)
-                                elif a == 1:
-                                    new_row = max(row - 1, 0)
-                                elif a == 2 and self.desc[1 + row, 2 * col + 2] == b":":
-                                    new_col = min(col + 1, maxC)
-                                elif a == 3 and self.desc[1 + row, 2 * col] == b":":
-                                    new_col = max(col - 1, 0)
-                                elif a == 4:  # pickup
-                                    if pass_idx < 4 and taxiloc == locs[pass_idx]:
-                                        new_pass_idx = 4
-                                    else:
-                                        reward = -10
-                                elif a == 5:  # dropoff
-                                    if (taxiloc == locs[dest_idx]) and pass_idx == 4:
-                                        new_pass_idx = dest_idx
-                                        done = True
-                                        reward = 20
-                                    elif (taxiloc in locs) and pass_idx == 4:
-                                        new_pass_idx = locs.index(taxiloc)
-                                    else:
-                                        reward = -10
-                                elif a == 6:  # fuel
-                                    if taxiloc == self.fuel_location:
-                                        new_fuel = self.fuel_capacity - 1
+                if a == 0:
+                    new_row = min(row + 1, maxR)
+                elif a == 1:
+                    new_row = max(row - 1, 0)
+                elif a == 2 and self.desc[1 + row, 2 * col + 2] == b":":
+                    new_col = min(col + 1, maxC)
+                elif a == 3 and self.desc[1 + row, 2 * col] == b":":
+                    new_col = max(col - 1, 0)
+                elif a == 4:  # pickup
+                    if pass_idx < 4 and taxiloc == locs[pass_idx]:
+                        new_pass_idx = 4
+                    else:
+                        reward = -10
+                elif a == 5:  # dropoff
+                    if (taxiloc == locs[dest_idx]) and pass_idx == 4:
+                        new_pass_idx = dest_idx
+                        done = True
+                        reward = 20
+                    elif (taxiloc in locs) and pass_idx == 4:
+                        new_pass_idx = locs.index(taxiloc)
+                    else:
+                        reward = -10
+                elif a == 6:  # fuel
+                    if taxiloc == self.fuel_location:
+                        new_fuel = self.fuel_capacity - 1
 
-                                if new_fuel <= 0:
-                                    new_fuel = 0
-                                    reward = -20
-                                    done = True
+                if new_fuel <= 0:
+                    new_fuel = 0
+                    reward = -20
+                    done = True
 
-                                if pass_idx == dest_idx or fuel == 0:
-                                    reward = 0
-                                    new_row, new_col, new_pass_idx, new_fuel = row, col, pass_idx, fuel
-                                    done = True
+                if pass_idx == dest_idx or fuel == 0:
+                    reward = 0
+                    new_row, new_col, new_pass_idx, new_fuel = row, col, pass_idx, fuel
+                    done = True
 
-                                newstate = self.encode(new_row, new_col, new_pass_idx, dest_idx, new_fuel)
-                                P[state][a].append((1.0, newstate, reward, done))
+                newstate = self.encode(new_row, new_col, new_pass_idx, dest_idx, new_fuel)
+                P[state][a].append((1.0, newstate, reward, done))
         isd /= isd.sum()
         discrete.DiscreteEnv.__init__(self, nS, nA, P, isd)
 
     def encode(self, taxirow, taxicol, passloc, destidx, fuel):
         # (5) 5, 5, 4, 3, fuel_capacity
         i = taxirow
-        i *= 5
+        i *= self.nC
         i += taxicol
-        i *= 5
+        i *= (len(self.locs) + 1)
         i += passloc
-        i *= 4
+        i *= (len(self.locs))
         i += destidx
         i *= self.fuel_capacity
         i += fuel
@@ -161,14 +161,14 @@ class TaxiFuelEnv(discrete.DiscreteEnv):
         out = []
         out.append(i % self.fuel_capacity)
         i = i // self.fuel_capacity
-        out.append(i % 4)
-        i = i // 4
-        out.append(i % 5)
-        i = i // 5
-        out.append(i % 5)
-        i = i // 5
+        out.append(i % len(self.locs))
+        i = i // len(self.locs)
+        out.append(i % (len(self.locs) + 1))
+        i = i // (len(self.locs) + 1)
+        out.append(i % self.nC)
+        i = i // self.nC
         out.append(i)
-        assert 0 <= i < 5
+        assert 0 <= i < self.nR
         return reversed(out)
 
     def render(self, mode='human'):
@@ -192,13 +192,13 @@ class TaxiFuelEnv(discrete.DiscreteEnv):
             out[1 + taxirow][2 * taxicol + 1] = utils.colorize(ul(out[1 + taxirow][2 * taxicol + 1]), 'green',
                                                                highlight=True)
 
-
         di, dj = self.locs[destidx]
         out[1 + di][2 * dj + 1] = utils.colorize(out[1 + di][2 * dj + 1], 'magenta')
         outfile.write("\n".join(["".join(row) for row in out]) + "\n")
 
         if self.lastaction is not None:
-            outfile.write("{}  ({})\n".format(fuelidx, ["South", "North", "East", "West", "Pickup", "Dropoff", "Refuel"][self.lastaction]))
+            action_names = ["South", "North", "East", "West", "Pickup", "Dropoff", "Refuel"]
+            outfile.write("{}  ({})\n".format(fuelidx, action_names[self.lastaction]))
         else:
             outfile.write("\n\n")
 

@@ -6,6 +6,7 @@ register(
     max_episode_steps=200,
     kwargs={
         'fuel_capacity': 14,
+        'map_name': "5x5",
     }
 )
 register(
