@@ -4,15 +4,38 @@ from gym import utils
 from gym.envs.toy_text import discrete
 import numpy as np
 
-MAP = [
-    "+---------+",
-    "|R: | : :G|",
-    "| : | : : |",
-    "| : : : : |",
-    "| | : | : |",
-    "|Y| : |B: |",
-    "+---------+",
-]
+MAPS = {
+    "5x5": [
+        "+---------+",
+        "|R: | : :G|",
+        "| : | : : |",
+        "| : : : : |",
+        "| | : | : |",
+        "|Y| : |B: |",
+        "+---------+",
+    ],
+    "6x6": [
+        "+-----------+",
+        "|R: | : :G: |",
+        "| : | : : : |",
+        "| : : : : : |",
+        "| | : | : : |",
+        "|Y| : |B: : |",
+        "| | : | : : |",
+        "+-----------+",
+    ],
+    "7x7": [
+        "+-------------+",
+        "|R: | : :G: : |",
+        "| : | : : : : |",
+        "| : : : : : : |",
+        "| | : | : : : |",
+        "|Y| : |B: : : |",
+        "| | : | : : : |",
+        "| | : | : : : |",
+        "+-------------+",
+    ]
+}
 
 
 class TaxiFuelEnv(discrete.DiscreteEnv):
@@ -50,8 +73,8 @@ class TaxiFuelEnv(discrete.DiscreteEnv):
     """
     metadata = {'render.modes': ['human', 'ansi']}
 
-    def __init__(self, fuel_capacity=14):
-        self.desc = np.asarray(MAP, dtype='c')
+    def __init__(self, fuel_capacity=14, map_name="5x5"):
+        self.desc = np.asarray(MAPS[map_name], dtype='c')
 
         self.locs = locs = [(0, 0), (0, 4), (4, 0), (4, 3)]
         self.fuel_capacity = fuel_capacity
