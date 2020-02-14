@@ -50,12 +50,10 @@ class TaxiFuelEnv(discrete.DiscreteEnv):
     """
     metadata = {'render.modes': ['human', 'ansi']}
 
-    def __init__(self, penalty_fuel_below_min_level=0, min_fuel_level=0, fuel_capacity=14):
+    def __init__(self, fuel_capacity=14):
         self.desc = np.asarray(MAP, dtype='c')
 
         self.locs = locs = [(0, 0), (0, 4), (4, 0), (4, 3)]
-        self.min_fuel_level = min_fuel_level
-        self.penalty_fuel_below_min_level = penalty_fuel_below_min_level
         self.fuel_capacity = fuel_capacity
         self.fuel_location = (3, 2)
 
@@ -80,7 +78,6 @@ class TaxiFuelEnv(discrete.DiscreteEnv):
                                 reward = -1
                                 done = False
                                 taxiloc = (row, col)
-
                                 new_fuel -= 1
 
                                 if a == 0:
@@ -113,9 +110,6 @@ class TaxiFuelEnv(discrete.DiscreteEnv):
                                     new_fuel = 0
                                     reward = -20
                                     done = True
-
-                                if new_fuel < min_fuel_level:
-                                    reward -= penalty_fuel_below_min_level
 
                                 if pass_idx == dest_idx or fuel == 0:
                                     reward = 0
