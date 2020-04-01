@@ -3,7 +3,7 @@ from six import StringIO
 from gym import utils
 from gym.envs.toy_text import discrete
 import numpy as np
-from itertools import product
+
 
 MAPS = {
     "5x5": [
@@ -46,10 +46,26 @@ class TaxiFuelEnv(discrete.DiscreteEnv):
     by Tom Dietterich
 
     Description:
-    There are four designated locations in the grid world indicated by R(ed), B(lue), G(reen), and Y(ellow). When the episode starts, the taxi starts off at a random square and the passenger is at a random location. The taxi drive to the passenger's location, pick up the passenger, drive to the passenger's destination (another one of the four specified locations), and then drop off the passenger. Once the passenger is dropped off, the episode ends.
+    There are four designated locations in the grid world indicated by R(ed), B(lue), G(reen), and Y(ellow).
+    The taxi starts off at a random square and the passenger is at one of the designated locations.
+    The taxi must:
+        - drive to the passenger's location
+        - pick up the passenger
+        - drive to the passenger's destination (another one of the four designated locations), and
+        - drop off the passenger.
+    Once the passenger is dropped off, the episode ends.
+
+    In the TaxiFuel variation, the taxi also has a fuel level that decreases after each action.
+    Running out of fuel gives a reward of -20 and terminates the episode.
+    To avoid this problem, the agent has an extra action that lets it refuel in a specific location.
 
     Observations:
-    There are 500 discrete states since there are 25 taxi positions, 5 possible locations of the passenger (including the case when the passenger is the taxi), and 4 destination locations.
+    In the default map (5x5), there are 7000 discrete states since there are:
+        - 25 taxi positions
+        - 5 possible locations of the passenger (including the case when the passenger is the taxi)
+        - 4 destination locations
+        - 14 fuel levels
+
 
     Actions:
     There are 6 discrete deterministic actions:
@@ -59,9 +75,11 @@ class TaxiFuelEnv(discrete.DiscreteEnv):
     - 3: move west
     - 4: pickup passenger
     - 5: dropoff passenger
+    - 6: refuel
 
     Rewards:
-    There is a reward of -1 for each action and an additional reward of +20 for delievering the passenger. There is a reward of -10 for executing actions "pickup" and "dropoff" illegally.
+    There is a reward of -1 for each action and an additional reward of +20 for delivering the passenger.
+    There is a reward of -10 for executing actions "pickup", "dropoff" or refuel illegally.
 
 
     Rendering:
@@ -75,7 +93,7 @@ class TaxiFuelEnv(discrete.DiscreteEnv):
     metadata = {'render.modes': ['human', 'ansi']}
 
     def __init__(self, fuel_capacity=14, map_name="5x5"):
-        assert map_name in MAPS.keys(), "map_name {} is invalid.\nValid names: {}".format(map_name, ", ".join(MAPS.keys()))
+        assert map_name in MAPS.keys(), "invalid map_name.\nValid names: {}".format(", ".join(MAPS.keys()))
         self.desc = np.asarray(MAPS[map_name], dtype='c')
 
         self.locs = locs = [(0, 0), (0, 4), (4, 0), (4, 3)]
@@ -87,8 +105,6 @@ class TaxiFuelEnv(discrete.DiscreteEnv):
         min_starting_fuel = 2 + (nR - 3) + (nC - 3)
 
         nS = nR * nC * (len(locs) + 1) * len(locs) * fuel_capacity
-        maxR = nR - 1
-        maxC = nC - 1
         isd = np.zeros(nS)
         nA = 7
         P = {s: {a: [] for a in range(nA)} for s in range(nS)}
@@ -104,11 +120,11 @@ class TaxiFuelEnv(discrete.DiscreteEnv):
                 new_fuel -= 1
 
                 if a == 0:
-                    new_row = min(row + 1, maxR)
+                    new_row = min(row + 1, nR - 1)
                 elif a == 1:
                     new_row = max(row - 1, 0)
                 elif a == 2 and self.desc[1 + row, 2 * col + 2] == b":":
-                    new_col = min(col + 1, maxC)
+                    new_col = min(col + 1, nC - 1)
                 elif a == 3 and self.desc[1 + row, 2 * col] == b":":
                     new_col = max(col - 1, 0)
                 elif a == 4:  # pickup
@@ -125,9 +141,11 @@ class TaxiFuelEnv(discrete.DiscreteEnv):
                         new_pass_idx = locs.index(taxiloc)
                     else:
                         reward = -10
-                elif a == 6:  # fuel
+                elif a == 6:  # refuel
                     if taxiloc == self.fuel_location:
                         new_fuel = self.fuel_capacity - 1
+                    else:
+                        reward = -10
 
                 if new_fuel <= 0:
                     new_fuel = 0
@@ -145,7 +163,6 @@ class TaxiFuelEnv(discrete.DiscreteEnv):
         discrete.DiscreteEnv.__init__(self, nS, nA, P, isd)
 
     def encode(self, taxirow, taxicol, passloc, destidx, fuel):
-        # (5) 5, 5, 4, 3, fuel_capacity
         i = taxirow
         i *= self.nC
         i += taxicol
@@ -158,8 +175,7 @@ class TaxiFuelEnv(discrete.DiscreteEnv):
         return i
 
     def decode(self, i):
-        out = []
-        out.append(i % self.fuel_capacity)
+        out = [i % self.fuel_capacity]
         i = i // self.fuel_capacity
         out.append(i % len(self.locs))
         i = i // len(self.locs)
@@ -181,7 +197,7 @@ class TaxiFuelEnv(discrete.DiscreteEnv):
         def ul(x):
             return "_" if x == " " else x
 
-        out[1 + self.fuel_location[0]][2 * self.fuel_location[1] + 1]= "F"
+        out[1 + self.fuel_location[0]][2 * self.fuel_location[1] + 1] = "F"
 
         if passidx < 4:
             out[1 + taxirow][2 * taxicol + 1] = utils.colorize(out[1 + taxirow][2 * taxicol + 1], 'yellow',
