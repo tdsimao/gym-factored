@@ -59,7 +59,6 @@ def right(s, ns):
     return min(s + 1, ns - 1)
 
 
-
 class SlipperyChainEnv(ChainEnv):
     def get_transition_function(self, na, ns):
         suc_prob = 0.9
@@ -72,4 +71,14 @@ class SlipperyChainEnv(ChainEnv):
             t[s, RIGHT, left(s)] = fail_prob
         t[0, :, 0] = 1
         t[ns - 1, :, ns - 1] = 1
+        return t
+
+
+class NonAbsorbingChainEnv(ChainEnv):
+    def get_transition_function(self, na, ns):
+        t = super().get_transition_function(na, ns)
+        t[0, 1, 0] = 0
+        t[0, 1, 1] = 1
+        t[ns - 1, 0, ns - 1] = 0
+        t[ns - 1, 0, ns - 2] = 1
         return t

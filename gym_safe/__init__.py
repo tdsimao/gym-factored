@@ -19,3 +19,9 @@ register(
     entry_point='gym_safe.envs.unittest:SlipperyChainEnv',
     max_episode_steps=200
 )
+
+register(
+    id='non_absorbing_chain-v0',
+    entry_point='gym_safe.envs.unittest:NonAbsorbingChainEnv',
+    max_episode_steps=200
+)
