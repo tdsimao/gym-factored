@@ -152,11 +152,6 @@ class TaxiFuelEnv(discrete.DiscreteEnv):
                     reward = -20
                     done = True
 
-                if pass_idx == dest_idx or fuel == 0:
-                    reward = 0
-                    new_row, new_col, new_pass_idx, new_fuel = row, col, pass_idx, fuel
-                    done = True
-
                 newstate = self.encode(new_row, new_col, new_pass_idx, dest_idx, new_fuel)
                 P[state][a].append((1.0, newstate, reward, done))
         isd /= isd.sum()
