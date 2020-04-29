@@ -1,3 +1,6 @@
+"""
+code from [RLBase repo][https://github.com/canmanietp/RLBase] by @canmanietp with minor changes.
+"""
 import sys
 from six import StringIO
 from gym import utils
