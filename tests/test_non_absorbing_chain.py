@@ -1,12 +1,12 @@
 import unittest
 import gym
-import gym_safe
+import gym_factored
 
 
 class TestChainEnv(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.env = gym.make("gym_safe:non_absorbing_chain-v0")
+        cls.env = gym.make("gym_factored:non_absorbing_chain-v0")
 
     def test_non_absorbing_left(self):
         successors = self.env.P[0][1]

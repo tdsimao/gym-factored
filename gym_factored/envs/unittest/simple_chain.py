@@ -3,6 +3,8 @@ from gym.envs.toy_text.discrete import DiscreteEnv
 
 LEFT = 0
 RIGHT = 1
+
+
 class ChainEnv(DiscreteEnv):
     """
     this is a simple chain env using the DiscreteEnv class
@@ -52,8 +54,10 @@ class ChainEnv(DiscreteEnv):
     def render(self, mode='human'):
         pass
 
+
 def left(s):
     return max(s - 1, 0)
+
 
 def right(s, ns):
     return min(s + 1, ns - 1)

@@ -1,12 +1,12 @@
 import unittest
 import gym
-import gym_safe
+import gym_factored
 
 
 class TestChainEnv(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.env = gym.make("gym_safe:chain-v0")
+        cls.env = gym.make("gym_factored:chain-v0")
 
     def test_reset_env(self):
         ob = self.env.reset()
