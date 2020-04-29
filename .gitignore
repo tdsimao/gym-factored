@@ -1,3 +1,5 @@
 __pycache__
 Pipfile.lock
 .idea
+gym_factored.egg-info/
+
