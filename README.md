@@ -1,12 +1,17 @@
 # gym-factored
 A collection of factored environments.
 
-## Quickstart 
+## Quick-start 
 
 ### Installation
 ```bash
 git clone https://github.com/tdsimao/gym-factored.git
 pip install -e gym-factored
+```
+
+Alternative;
+```bash
+pip install -e  git+git://github.com/tdsimao/gym-factored.git#egg=gym_factored
 ```
 
 ### Tests
