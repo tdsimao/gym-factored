@@ -26,6 +26,18 @@ class TestSysAdminEnv(unittest.TestCase):
         decoded_initial_state = list(self.env.decode(initial_state))
         self.assertListEqual(decoded_initial_state, [1, 1, 1, 1, 1, 1, 1, 1])
 
+    def test_rendering(self):
+        self.env.reset()
+        done = False
+        while not done:
+            action = self.env.action_space.sample()
+            _, _, done, _ = self.env.step(action)
+            out = self.env.render(mode='ansi')
+            lines = out.getvalue().split('\n')
+            if action < 8:
+                self.assertEqual(lines[0][action], 'O')
+            self.assertEqual(lines[1][action], '^')
+
 
 class TestSysAdminXEnv(unittest.TestCase):
     def test_eight_machines(self):
@@ -39,3 +51,4 @@ class TestSysAdminXEnv(unittest.TestCase):
         initial_state = env.reset()
         decoded_initial_state = list(env.decode(initial_state))
         self.assertListEqual(decoded_initial_state, [1, 1, 1, 1, 1])
+
