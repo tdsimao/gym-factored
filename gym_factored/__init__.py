@@ -37,3 +37,23 @@ for i in range(3, 50):
         max_episode_steps=40,
         kwargs={'size': i},
     )
+register(
+    id='stock-trading-v0',
+    entry_point='gym_factored.envs.stock_trading:StockTradingEnv',
+    max_episode_steps=40,
+    kwargs={
+        'number_of_sectors': 3,
+        'number_of_stocks_per_sector': 2,
+    },
+)
+for i in range(1, 5):
+    for j in range(1, 5):
+        register(
+            id='stock-trading_{}_{}-v0'.format(i, j),
+            entry_point='gym_factored.envs.stock_trading:StockTradingEnv',
+            max_episode_steps=40,
+            kwargs={
+                'number_of_sectors': i,
+                'number_of_stocks_per_sector': j
+            },
+        )
