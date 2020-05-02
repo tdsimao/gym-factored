@@ -1,6 +1,5 @@
 import unittest
 import gym
-import gym_factored
 
 
 class TestStockTradingEnv(unittest.TestCase):

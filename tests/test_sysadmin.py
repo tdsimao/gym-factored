@@ -1,6 +1,5 @@
 import unittest
 import gym
-import gym_factored
 
 
 class TestSysAdminEnv(unittest.TestCase):
