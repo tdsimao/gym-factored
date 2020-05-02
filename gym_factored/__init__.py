@@ -57,3 +57,12 @@ for i in range(1, 5):
                 'number_of_stocks_per_sector': j
             },
         )
+register(
+    id='bridge-v0',
+    entry_point='gym_factored.envs.bridge:BridgeEnv',
+    max_episode_steps=200,
+    kwargs={
+        'bridge_len': 10,
+        'max_swimming_len': 5
+    },
+)
