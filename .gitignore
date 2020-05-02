@@ -4,3 +4,5 @@ Pipfile.lock
 gym_factored.egg-info/
 dist/
 build/
+scripts/
+
