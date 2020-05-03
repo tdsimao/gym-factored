@@ -11,7 +11,7 @@ pip install -e gym-factored
 
 Alternative;
 ```bash
-pip install -e  git+git://github.com/tdsimao/gym-factored.git#egg=gym_factored
+pip install -e  git+git://github.com/tdsimao/gym-factored.git
 ```
 
 ### Tests
