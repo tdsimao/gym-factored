@@ -5,7 +5,7 @@ import gym
 class TestSysAdminEnv(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.env = gym.make("gym_factored:SysAdmin-v0")
+        cls.env = gym.make("gym_factored:sysadmin-v0")
 
     def test_reset_env(self):
         state = self.env.reset()
@@ -40,13 +40,13 @@ class TestSysAdminEnv(unittest.TestCase):
 
 class TestSysAdminXEnv(unittest.TestCase):
     def test_eight_machines(self):
-        env = gym.make("gym_factored:SysAdmin8-v0")
+        env = gym.make("gym_factored:sysadmin8-v0")
         initial_state = env.reset()
         decoded_initial_state = list(env.decode(initial_state))
         self.assertListEqual(decoded_initial_state, [1, 1, 1, 1, 1, 1, 1, 1])
 
     def test_five_machines(self):
-        env = gym.make("gym_factored:SysAdmin5-v0")
+        env = gym.make("gym_factored:sysadmin5-v0")
         initial_state = env.reset()
         decoded_initial_state = list(env.decode(initial_state))
         self.assertListEqual(decoded_initial_state, [1, 1, 1, 1, 1])

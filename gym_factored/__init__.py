@@ -25,14 +25,14 @@ register(
     max_episode_steps=200
 )
 register(
-    id='SysAdmin-v0',
+    id='sysadmin-v0',
     entry_point='gym_factored.envs.sysadmin:SysAdminEnv',
     max_episode_steps=40,
     kwargs={'size': 8},
 )
 for i in range(3, 50):
     register(
-        id='SysAdmin{}-v0'.format(i),
+        id='sysadmin{}-v0'.format(i),
         entry_point='gym_factored.envs.sysadmin:SysAdminEnv',
         max_episode_steps=40,
         kwargs={'size': i},
