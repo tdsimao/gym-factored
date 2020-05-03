@@ -48,3 +48,10 @@ Executing the code above should give an output like:
 5405 [3, 4, 1, 2, 1] 5405
 5404 [3, 4, 1, 2, 0] 5404
 ```
+
+## List of environments
+
+1. [TaxiFuel](./gym_factored/envs/taxi_fuel_env.py): `gym.make('gym_factored:taxi-fuel-v0')`
+2. [SysAdmin](./gym_factored/envs/sysadmin.py): `gym.make('gym_factored:SysAdmin-v0')`
+3. [StockTrading](./gym_factored/envs/stock_trading.py): `gym.make('gym_factored:stock-trading-v0')`
+4. [Bridge](./gym_factored/envs/bridge.py): `gym.make('gym_factored:bridge-v0')`
