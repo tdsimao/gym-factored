@@ -2,7 +2,7 @@ from gym.envs.registration import register
 
 register(
     id='taxi-fuel-v0',
-    entry_point='gym_factored.envs:TaxiFuelEnv',
+    entry_point='gym_factored.envs.taxi_fuel:TaxiFuelEnv',
     max_episode_steps=200,
     kwargs={
         'fuel_capacity': 14,
@@ -11,17 +11,17 @@ register(
 )
 register(
     id='chain-v0',
-    entry_point='gym_factored.envs.unittest:ChainEnv',
+    entry_point='gym_factored.envs.simple_chain:ChainEnv',
     max_episode_steps=200
 )
 register(
     id='slippery_chain-v0',
-    entry_point='gym_factored.envs.unittest:SlipperyChainEnv',
+    entry_point='gym_factored.envs.simple_chain:SlipperyChainEnv',
     max_episode_steps=200
 )
 register(
     id='non_absorbing_chain-v0',
-    entry_point='gym_factored.envs.unittest:NonAbsorbingChainEnv',
+    entry_point='gym_factored.envs.simple_chain:NonAbsorbingChainEnv',
     max_episode_steps=200
 )
 register(
