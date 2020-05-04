@@ -22,7 +22,8 @@ class BridgeEnv(gym.Env):
         self.bridge_len = bridge_len
         self.max_swimming_len = max_swimming_len
 
-        self.action_space = range(3)
+        self.action_space = spaces.Discrete(3)
+        self.observation_space = spaces.Discrete(bridge_len * max_swimming_len)
         self.actions_probs = {
             FORWARD: [.99, 0., .01],
             BACKWARD: [0, 1, 0],
@@ -52,7 +53,7 @@ class BridgeEnv(gym.Env):
         assert action in self.action_space, 'Illegal action.'
         self.last_action = action
         reward, done = self._move(action)
-        return self._get_observation(), reward, done, {}
+        return self._get_observation(), reward, done, {'suc': self._is_at_goal()}
 
     def _move(self, action):
         reward = self.rewards['step']
@@ -63,7 +64,7 @@ class BridgeEnv(gym.Env):
             action_effect = int(np.where(selector == 1)[0])
             if action_effect == FORWARD:
                 self.pos_x += 1
-                if self.pos_x == self.bridge_len - 1:
+                if self._is_at_goal():
                     reward = self.rewards['positive']
                     done = True
             elif action_effect == BACKWARD:
@@ -73,14 +74,14 @@ class BridgeEnv(gym.Env):
                 self.swim_steps = 1
         else:
             if self.swim_steps == self.swimming_limit:
-                # self.pos_x = 0
-                # self.swim_steps, self.swimming_limit = [0, 0]
-                self.swim_steps += 1
                 reward = self.rewards['negative']
                 done = True
             else:
                 self.swim_steps += 1
         return reward, done
+
+    def _is_at_goal(self):
+        return self.pos_x == (self.bridge_len - 1)
 
     def _get_observation(self):
         return self.encode(self.pos_x, self.swim_steps)
