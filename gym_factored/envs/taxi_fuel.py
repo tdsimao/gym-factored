@@ -160,6 +160,15 @@ class TaxiFuelEnv(discrete.DiscreteEnv):
         isd /= isd.sum()
         discrete.DiscreteEnv.__init__(self, nS, nA, P, isd)
 
+    def step(self, a):
+        state, reward, done, info = super().step(a)
+        info['suc'] = self.goal_state(state)
+        return state, reward, done, info
+
+    def goal_state(self, state):
+        dec_state = list(self.decode(state))
+        return dec_state[2] == dec_state[3]
+
     def encode(self, taxirow, taxicol, passloc, destidx, fuel):
         i = taxirow
         i *= self.nC
