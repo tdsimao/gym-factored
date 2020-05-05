@@ -24,29 +24,32 @@ python -m unittest discover gym-factored/tests/
 ```python
 import gym
 
-if __name__ == '__main__':
-    env = gym.make('gym_factored:taxi-fuel-v0')
-    env.seed(42)
-    ob = env.reset()
-    print(ob, list(env.decode(ob)), env.encode(*list(env.decode(ob))))
-    while True:
-        action = env.action_space.sample()
-        ob, reward, done, _ = env.step(action)
-        print(ob, list(env.decode(ob)), env.encode(*list(env.decode(ob))))
-        if done:
-            break
+env = gym.make('gym_factored:taxi-fuel-v0')
+ob = env.reset()
+decoded_state = list(env.decode(ob))
+assert ob == env.encode(*decoded_state)
+while True:
+    action = env.action_space.sample()
+    ob, reward, done, _ = env.step(action)
+    decoded_state = list(env.decode(ob))
+    print(ob, decoded_state)
+    assert ob == env.encode(*decoded_state)
+    if done:
+        break
 ```
 
 Executing the code above should give an output like:
 ```
-2611 [1, 4, 1, 2, 7] 2611
-2610 [1, 4, 1, 2, 6] 2610
-2609 [1, 4, 1, 2, 5] 2609
-4008 [2, 4, 1, 2, 4] 4008
-4007 [2, 4, 1, 2, 3] 4007
-5406 [3, 4, 1, 2, 2] 5406
-5405 [3, 4, 1, 2, 1] 5405
-5404 [3, 4, 1, 2, 0] 5404
+1241 [0, 4, 2, 0, 9]
+1240 [0, 4, 2, 0, 8]
+959 [0, 3, 2, 0, 7]
+958 [0, 3, 2, 0, 6]
+957 [0, 3, 2, 0, 5]
+956 [0, 3, 2, 0, 4]
+955 [0, 3, 2, 0, 3]
+954 [0, 3, 2, 0, 2]
+1233 [0, 4, 2, 0, 1]
+2632 [1, 4, 2, 0, 0]
 ```
 
 ## List of environments
