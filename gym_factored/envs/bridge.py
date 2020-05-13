@@ -53,7 +53,11 @@ class BridgeEnv(gym.Env):
         assert action in self.action_space, 'Illegal action.'
         self.last_action = action
         reward, done = self._move(action)
-        return self._get_observation(), reward, done, {'suc': self._is_at_goal()}
+        info = {
+            'suc': self._is_at_goal(),
+            'fail': self.swim_steps == self.swimming_limit
+        }
+        return self._get_observation(), reward, done, info
 
     def _move(self, action):
         reward = self.rewards['step']
