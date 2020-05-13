@@ -163,11 +163,16 @@ class TaxiFuelEnv(discrete.DiscreteEnv):
     def step(self, a):
         state, reward, done, info = super().step(a)
         info['suc'] = self.goal_state(state)
+        info['fail'] = self.out_of_fuel(state)
         return state, reward, done, info
 
     def goal_state(self, state):
         dec_state = list(self.decode(state))
         return dec_state[2] == dec_state[3]
+
+    def out_of_fuel(self, state):
+        dec_state = list(self.decode(state))
+        return dec_state[4] == 0
 
     def encode(self, taxirow, taxicol, passloc, destidx, fuel):
         i = taxirow
@@ -228,3 +233,4 @@ class TaxiFuelEnv(discrete.DiscreteEnv):
         # No need to return anything for human
         if mode != 'human':
             return outfile
+
