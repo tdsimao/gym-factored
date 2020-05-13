@@ -28,7 +28,7 @@ class TestBridgeEnv(unittest.TestCase):
         while not done:
             state, reward, done, info = self.env.step(2)
             episode_length += 1
-        self.assertIn(episode_length, range(3, 5))
+        self.assertIn(episode_length, range(3, 6))
         self.assertEqual(reward, -1)
         self.assertEqual(state, episode_length - 1)
         self.assertListEqual(list(self.env.decode(state)), [0, episode_length - 1])
