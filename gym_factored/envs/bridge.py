@@ -1,5 +1,7 @@
 import gym
 from gym import spaces
+from gym.utils import seeding
+from gym.envs.toy_text.discrete import categorical_sample
 import sys
 import numpy as np
 from six import StringIO
@@ -40,6 +42,7 @@ class BridgeEnv(gym.Env):
         self.swimming_limit = 0
 
         self.last_action = None
+        self.np_random = None
         self.reset()
 
     def reset(self):
@@ -50,11 +53,11 @@ class BridgeEnv(gym.Env):
         return self._get_observation()
 
     def step(self, action):
-        assert action in self.action_space, 'Illegal action.'
+        # assert action in self.action_space, 'Illegal action.'
         self.last_action = action
         reward, done = self._move(action)
         info = {
-            'suc': self._is_at_goal(),
+            'suc': self.pos_x == (self.bridge_len - 1),
             'fail': self.swim_steps == self.swimming_limit
         }
         return self._get_observation(), reward, done, info
@@ -64,11 +67,14 @@ class BridgeEnv(gym.Env):
         done = False
         if self.swim_steps == 0:
             # from behaviour-prob of the taken action
-            selector = np.random.multinomial(1, self.actions_probs[action])
-            action_effect = int(np.where(selector == 1)[0])
+            if action == FORWARD:
+                action_effect = categorical_sample(self.actions_probs[action], self.np_random)
+            else:
+                action_effect = self.actions_probs[action].index(1)
+
             if action_effect == FORWARD:
                 self.pos_x += 1
-                if self._is_at_goal():
+                if self.pos_x == (self.bridge_len - 1):
                     reward = self.rewards['positive']
                     done = True
             elif action_effect == BACKWARD:
@@ -83,9 +89,6 @@ class BridgeEnv(gym.Env):
             else:
                 self.swim_steps += 1
         return reward, done
-
-    def _is_at_goal(self):
-        return self.pos_x == (self.bridge_len - 1)
 
     def _get_observation(self):
         return self.encode(self.pos_x, self.swim_steps)
@@ -111,3 +114,7 @@ class BridgeEnv(gym.Env):
         outfile.write("last action: {}\n".format(ACTIONS[self.last_action]) if self.last_action is not None else "")
         if mode != 'human':
             return outfile
+
+    def seed(self, seed=None):
+        self.np_random, seed = seeding.np_random(seed)
+        return [seed]
