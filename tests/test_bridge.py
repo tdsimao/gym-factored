@@ -18,7 +18,10 @@ class TestBridgeEnv(unittest.TestCase):
         while not done:
             state, reward, done, info = self.env.step(1)
             episode_length += 1
-        self.assertEqual(episode_length, 200)
+        self.assertEqual(state, 0)
+        self.assertEqual(episode_length, 250)
+        self.assertFalse(info["suc"])
+        self.assertFalse(info["fail"])
 
     def test_fail_end(self):
         self.env.reset()
@@ -32,8 +35,24 @@ class TestBridgeEnv(unittest.TestCase):
         self.assertEqual(reward, -1)
         self.assertEqual(state, episode_length - 1)
         self.assertListEqual(list(self.env.decode(state)), [0, episode_length - 1])
-        self.assertTrue(done)
         self.assertTrue(info['fail'])
+
+    def test_success(self):
+        self.env.reset()
+        episode_length = 0
+        state, reward, info = 0, 0, {}
+        done = False
+        while not done:
+            state, reward, done, info = self.env.step(0)
+            episode_length += 1
+
+        if list(self.env.decode(state))[1] == 0:
+            self.assertEqual(reward, 100)
+            self.assertListEqual(list(self.env.decode(state)), [9, 0])
+            self.assertTrue(info['suc'])
+        else:
+            self.assertEqual(reward, -1)
+            self.assertTrue(info['fail'])
 
     def test_decode(self):
         initial_state = self.env.reset()

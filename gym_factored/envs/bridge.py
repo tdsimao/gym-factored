@@ -1,5 +1,4 @@
-import gym
-from gym import spaces
+from gym.envs.toy_text.discrete import DiscreteEnv
 from gym.utils import seeding
 from gym.envs.toy_text.discrete import categorical_sample
 import sys
@@ -12,7 +11,7 @@ FALL = 2
 ACTIONS = ['FORWARD', 'BACKWARD', 'FALL']
 
 
-class BridgeEnv(gym.Env):
+class BridgeEnv(DiscreteEnv):
     """
     The bridge problem.
         Fatemi, M.; Sharma, S.; Van Seijen, H.; and Kahou, S. E. 2019.
@@ -23,75 +22,54 @@ class BridgeEnv(gym.Env):
     def __init__(self, bridge_len, max_swimming_len):
         self.bridge_len = bridge_len
         self.max_swimming_len = max_swimming_len
+        nS = self.bridge_len * self.max_swimming_len
+        isd = np.zeros(nS)
+        isd[0] = 1
+        nA = 3
+        P = {s: {a: [] for a in range(nA)} for s in range(nS)}
+        for state in range(nS):
+            pos_x, swim_step = list(self.decode(state))
+            for a in range(nA):
+                if swim_step == 0:
+                    if a == FORWARD:
+                        new_x = min(pos_x + 1, self.bridge_len - 1)
+                        s = self.encode(new_x, swim_step)
+                        if new_x == self.bridge_len - 1:
+                            P[state][a].append((0.99, s, 100, True, {"suc": True}))
+                        else:
+                            P[state][a].append((0.99, s, 0, False, {}))
+                        s = self.encode(pos_x, 1)
+                        P[state][a].append((0.01, s, 0, False, {}))
+                    elif a == BACKWARD:
+                        s = self.encode(max(pos_x - 1, 0), swim_step)
+                        P[state][a].append((1.0, s, 0, False, {}))
+                    else:
+                        s = self.encode(pos_x, 1)
+                        P[state][a].append((1.0, s, 0, False, {}))
+                elif swim_step < 2:
+                    s = self.encode(pos_x, swim_step + 1)
+                    P[state][a].append((1.0, s, 0, False, {}))
+                else:
+                    prob_drawn = 1.0/(self.max_swimming_len - swim_step)
+                    s = self.encode(pos_x, min(swim_step, max_swimming_len))
+                    P[state][a].append((prob_drawn, s, -1, True, {'fail': True}))
 
-        self.action_space = spaces.Discrete(3)
-        self.observation_space = spaces.Discrete(bridge_len * max_swimming_len)
-        self.actions_probs = {
-            FORWARD: [.99, 0., .01],
-            BACKWARD: [0, 1, 0],
-            FALL: [0, 0, 1]
-        }
-        self.rewards = {
-            'positive': 100.0,
-            'negative': -1.0,
-            'step': 0.0
-        }
+                    s = self.encode(pos_x, min(swim_step + 1, max_swimming_len))
+                    P[state][a].append((1.0 - prob_drawn, s, 0, False, {}))
 
-        self.pos_x = 0
-        self.swim_steps = 0
-        self.swimming_limit = 0
+                for p, _, _, d, info in P[state][a]:
+                    info["prob"] = p
+                    info["suc"] = info.get("suc", False)
+                    info["fail"] = info.get("fail", False)
+        DiscreteEnv.__init__(self, nS, nA, P, isd)
 
-        self.last_action = None
-        self.np_random = None
-        self.reset()
-
-    def reset(self):
-        self.last_action = None
-        self.pos_x = 0
-        self.swim_steps = 0
-        self.swimming_limit = np.random.randint(2, self.max_swimming_len)
-        return self._get_observation()
-
-    def step(self, action):
-        # assert action in self.action_space, 'Illegal action.'
-        self.last_action = action
-        reward, done = self._move(action)
-        info = {
-            'suc': self.pos_x == (self.bridge_len - 1),
-            'fail': self.swim_steps == self.swimming_limit
-        }
-        return self._get_observation(), reward, done, info
-
-    def _move(self, action):
-        reward = self.rewards['step']
-        done = False
-        if self.swim_steps == 0:
-            # from behaviour-prob of the taken action
-            if action == FORWARD:
-                action_effect = categorical_sample(self.actions_probs[action], self.np_random)
-            else:
-                action_effect = self.actions_probs[action].index(1)
-
-            if action_effect == FORWARD:
-                self.pos_x += 1
-                if self.pos_x == (self.bridge_len - 1):
-                    reward = self.rewards['positive']
-                    done = True
-            elif action_effect == BACKWARD:
-                if self.pos_x != 0:
-                    self.pos_x -= 1
-            elif action_effect == FALL:
-                self.swim_steps = 1
-        else:
-            if self.swim_steps == self.swimming_limit:
-                reward = self.rewards['negative']
-                done = True
-            else:
-                self.swim_steps += 1
-        return reward, done
-
-    def _get_observation(self):
-        return self.encode(self.pos_x, self.swim_steps)
+    def step(self, a):
+        transitions = self.P[self.s][a]
+        i = categorical_sample([t[0] for t in transitions], self.np_random)
+        p, s, r, d, info = transitions[i]
+        self.s = s
+        self.lastaction = a
+        return (s, r, d, info)
 
     def encode(self, pos_x, swim_step):
         return pos_x * self.max_swimming_len + swim_step
@@ -106,15 +84,12 @@ class BridgeEnv(gym.Env):
     def render(self, mode='human'):
         outfile = StringIO() if mode == 'ansi' else sys.stdout
         bridge_river_map = [["=" for _ in range(self.bridge_len)]]
+        pos_x, swim_steps = self.decode(self.s)
         for i in range(self.max_swimming_len):
             bridge_river_map.append(["≈" for _ in range(self.bridge_len)])
-        bridge_river_map[self.swim_steps][self.pos_x] = "*"
+        bridge_river_map[swim_steps][pos_x] = "*"
         for line in bridge_river_map:
             outfile.write("".join(line) + "\n")
-        outfile.write("last action: {}\n".format(ACTIONS[self.last_action]) if self.last_action is not None else "")
+        outfile.write("last action: {}\n".format(ACTIONS[self.lastaction]) if self.lastaction is not None else "")
         if mode != 'human':
             return outfile
-
-    def seed(self, seed=None):
-        self.np_random, seed = seeding.np_random(seed)
-        return [seed]
