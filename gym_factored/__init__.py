@@ -60,7 +60,7 @@ for i in range(1, 5):
 register(
     id='bridge-v0',
     entry_point='gym_factored.envs.bridge:BridgeEnv',
-    max_episode_steps=200,
+    max_episode_steps=250,
     kwargs={
         'bridge_len': 10,
         'max_swimming_len': 5
