@@ -204,13 +204,13 @@ class TaxiFuelEnv(discrete.DiscreteEnv):
 
         out = self.desc.copy().tolist()
         out = [[c.decode('utf-8') for c in line] for line in out]
-        taxirow, taxicol, passidx, destidx, fuelidx = self.decode(self.s)
+        taxirow, taxicol, passidx, destidx, fuel = self.decode(self.s)
 
         def ul(x):
             return "_" if x == " " else x
 
         out[1 + self.fuel_location[0]][2 * self.fuel_location[1] + 1] = "F"
-
+        out.append("|" + "█" * fuel + " " * (self.fuel_capacity - fuel  - 1) + "|")
         if passidx < 4:
             out[1 + taxirow][2 * taxicol + 1] = utils.colorize(out[1 + taxirow][2 * taxicol + 1], 'yellow',
                                                                highlight=True)
@@ -226,7 +226,7 @@ class TaxiFuelEnv(discrete.DiscreteEnv):
 
         if self.lastaction is not None:
             action_names = ["South", "North", "East", "West", "Pickup", "Dropoff", "Refuel"]
-            outfile.write("{}  ({})\n".format(fuelidx, action_names[self.lastaction]))
+            outfile.write("{}  ({})\n".format(fuel, action_names[self.lastaction]))
         else:
             outfile.write("\n\n")
 
