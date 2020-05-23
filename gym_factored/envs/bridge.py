@@ -1,5 +1,4 @@
 from gym.envs.toy_text.discrete import DiscreteEnv
-from gym.utils import seeding
 from gym.envs.toy_text.discrete import categorical_sample
 import sys
 import numpy as np
