@@ -99,66 +99,71 @@ class TaxiFuelEnv(discrete.DiscreteEnv):
         assert map_name in MAPS.keys(), "invalid map_name.\nValid names: {}".format(", ".join(MAPS.keys()))
         self.desc = np.asarray(MAPS[map_name], dtype='c')
 
-        self.locs = locs = [(0, 0), (0, 4), (4, 0), (4, 3)]
+        self.locs = [(0, 0), (0, 4), (4, 0), (4, 3)]
         self.fuel_capacity = fuel_capacity
         self.fuel_location = (3, 2)
 
-        nR, nC = map_name.split('x')
-        self.nR, self.nC = nR, nC = int(nR), int(nC)
-        min_starting_fuel = 2 + (nR - 3) + (nC - 3)
+        self.nR, self.nC = [int(n) for n in map_name.split('x')]
+        self.min_starting_fuel = 2 + (self.nR - 3) + (self.nC - 3)
 
-        nS = nR * nC * (len(locs) + 1) * len(locs) * fuel_capacity
-        isd = np.zeros(nS)
-        nA = 7
-        P = {s: {a: [] for a in range(nA)} for s in range(nS)}
-        for state in range(nS):
-            row, col, pass_idx, dest_idx, fuel = self.decode(state)
-            if pass_idx < 4 and pass_idx != dest_idx and fuel >= min_starting_fuel:
+        number_of_states = self.nR * self.nC * (len(self.locs) + 1) * len(self.locs) * fuel_capacity
+        isd = np.zeros(number_of_states)
+        number_of_actions = 7
+        transitions = {s: {a: [] for a in range(number_of_actions)} for s in range(number_of_states)}
+        for state in range(number_of_states):
+            if self.is_starting_state(state):
                 isd[state] += 1
-            for a in range(nA):
-                new_row, new_col, new_pass_idx, new_fuel = row, col, pass_idx, fuel
-                reward = -1
-                done = False
-                taxiloc = (row, col)
-                new_fuel -= 1
-
-                if a == 0:
-                    new_row = min(row + 1, nR - 1)
-                elif a == 1:
-                    new_row = max(row - 1, 0)
-                elif a == 2 and self.desc[1 + row, 2 * col + 2] == b":":
-                    new_col = min(col + 1, nC - 1)
-                elif a == 3 and self.desc[1 + row, 2 * col] == b":":
-                    new_col = max(col - 1, 0)
-                elif a == 4:  # pickup
-                    if pass_idx < 4 and taxiloc == locs[pass_idx]:
-                        new_pass_idx = 4
-                    else:
-                        reward = -10
-                elif a == 5:  # dropoff
-                    if (taxiloc == locs[dest_idx]) and pass_idx == 4:
-                        new_pass_idx = dest_idx
-                        done = True
-                        reward = 20
-                    elif (taxiloc in locs) and pass_idx == 4:
-                        new_pass_idx = locs.index(taxiloc)
-                    else:
-                        reward = -10
-                elif a == 6:  # refuel
-                    if taxiloc == self.fuel_location:
-                        new_fuel = self.fuel_capacity - 1
-                    else:
-                        reward = -10
-
-                if new_fuel <= 0:
-                    new_fuel = 0
-                    reward = -20
-                    done = True
-
-                newstate = self.encode(new_row, new_col, new_pass_idx, dest_idx, new_fuel)
-                P[state][a].append((1.0, newstate, reward, done))
+            for action in range(number_of_actions):
+                done, new_state, reward = self.get_transition(action, state)
+                transitions[state][action].append((1.0, new_state, reward, done))
         isd /= isd.sum()
-        discrete.DiscreteEnv.__init__(self, nS, nA, P, isd)
+        discrete.DiscreteEnv.__init__(self, number_of_states, number_of_actions, transitions, isd)
+
+    def is_starting_state(self, state):
+        row, col, pass_idx, dest_idx, fuel = self.decode(state)
+        starting_state = pass_idx < 4 and pass_idx != dest_idx and fuel >= self.min_starting_fuel
+        return starting_state
+
+    def get_transition(self, a, state):
+        row, col, pass_idx, dest_idx, fuel = self.decode(state)
+        new_row, new_col, new_pass_idx, new_fuel = row, col, pass_idx, fuel
+        reward = -1
+        done = False
+        taxiloc = (row, col)
+        new_fuel -= 1
+        if a == 0:
+            new_row = min(row + 1, self.nR - 1)
+        elif a == 1:
+            new_row = max(row - 1, 0)
+        elif a == 2 and self.desc[1 + row, 2 * col + 2] == b":":
+            new_col = min(col + 1, self.nC - 1)
+        elif a == 3 and self.desc[1 + row, 2 * col] == b":":
+            new_col = max(col - 1, 0)
+        elif a == 4:  # pickup
+            if pass_idx < 4 and taxiloc == self.locs[pass_idx]:
+                new_pass_idx = 4
+            else:
+                reward = -10
+        elif a == 5:  # dropoff
+            if (taxiloc == self.locs[dest_idx]) and pass_idx == 4:
+                new_pass_idx = dest_idx
+                done = True
+                reward = 20
+            elif (taxiloc in self.locs) and pass_idx == 4:
+                new_pass_idx = self.locs.index(taxiloc)
+            else:
+                reward = -10
+        elif a == 6:  # refuel
+            if taxiloc == self.fuel_location:
+                new_fuel = self.fuel_capacity - 1
+            else:
+                reward = -10
+        if new_fuel <= 0:
+            new_fuel = 0
+            reward = -20
+            done = True
+        newstate = self.encode(new_row, new_col, new_pass_idx, dest_idx, new_fuel)
+        return done, newstate, reward
 
     def step(self, a):
         state, reward, done, info = super().step(a)
@@ -210,7 +215,7 @@ class TaxiFuelEnv(discrete.DiscreteEnv):
             return "_" if x == " " else x
 
         out[1 + self.fuel_location[0]][2 * self.fuel_location[1] + 1] = "F"
-        out.append("|" + "█" * fuel + " " * (self.fuel_capacity - fuel  - 1) + "|")
+        out.append("|" + "█" * fuel + " " * (self.fuel_capacity - fuel - 1) + "|")
         if passidx < 4:
             out[1 + taxirow][2 * taxicol + 1] = utils.colorize(out[1 + taxirow][2 * taxicol + 1], 'yellow',
                                                                highlight=True)
@@ -233,4 +238,3 @@ class TaxiFuelEnv(discrete.DiscreteEnv):
         # No need to return anything for human
         if mode != 'human':
             return outfile
-
