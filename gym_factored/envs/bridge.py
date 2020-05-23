@@ -53,8 +53,9 @@ class BridgeEnv(DiscreteEnv):
                     s = self.encode(pos_x, min(swim_step, max_swimming_len))
                     P[state][a].append((prob_drawn, s, -1, True, {'fail': True}))
 
-                    s = self.encode(pos_x, min(swim_step + 1, max_swimming_len))
-                    P[state][a].append((1.0 - prob_drawn, s, 0, False, {}))
+                    if prob_drawn < 1:
+                        s = self.encode(pos_x, min(swim_step + 1, max_swimming_len))
+                        P[state][a].append((1.0 - prob_drawn, s, 0, False, {}))
 
                 for p, _, _, d, info in P[state][a]:
                     info["prob"] = p
