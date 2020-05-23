@@ -10,6 +10,15 @@ register(
     }
 )
 register(
+    id='taxi-fuel-ext-v0',
+    entry_point='gym_factored.envs.taxi_fuel_ext:TaxiFuelExtEnv',
+    max_episode_steps=200,
+    kwargs={
+        'fuel_capacity': 14,
+        'map_name': "5x5",
+    }
+)
+register(
     id='chain-v0',
     entry_point='gym_factored.envs.simple_chain:ChainEnv',
     max_episode_steps=200
