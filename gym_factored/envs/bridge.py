@@ -1,4 +1,4 @@
-from gym.envs.toy_text.discrete import DiscreteEnv
+from gym_factored.envs.base import DiscreteEnv
 from gym.envs.toy_text.discrete import categorical_sample
 import sys
 import numpy as np
@@ -63,14 +63,6 @@ class BridgeEnv(DiscreteEnv):
                     info["fail"] = info.get("fail", False)
                     info["cost"] = int(info["fail"])
         DiscreteEnv.__init__(self, nS, nA, P, isd)
-
-    def step(self, a):
-        transitions = self.P[self.s][a]
-        i = categorical_sample([t[0] for t in transitions], self.np_random)
-        p, s, r, d, info = transitions[i]
-        self.s = s
-        self.lastaction = a
-        return (s, r, d, info)
 
     def encode(self, pos_x, swim_step):
         return pos_x * self.max_swimming_len + swim_step

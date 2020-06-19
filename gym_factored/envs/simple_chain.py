@@ -1,5 +1,5 @@
 import numpy as np
-from gym.envs.toy_text.discrete import DiscreteEnv
+from gym_factored.envs.base import DiscreteEnv
 
 LEFT = 0
 RIGHT = 1
@@ -38,7 +38,8 @@ class ChainEnv(DiscreteEnv):
                         else:
                             reward = 0
                         done = terminal_states[new_state]
-                        p[s][a].append((transition_prob, new_state, reward, done))
+                        info = {}
+                        p[s][a].append((transition_prob, new_state, reward, done, info))
         isd /= isd.sum()
         DiscreteEnv.__init__(self, ns, na, p, isd)
 

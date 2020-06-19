@@ -4,7 +4,7 @@ code from [RLBase repo][https://github.com/canmanietp/RLBase] by @canmanietp wit
 import sys
 from six import StringIO
 from gym import utils
-from gym.envs.toy_text import discrete
+from gym_factored.envs.base import DiscreteEnv
 import numpy as np
 
 
@@ -42,7 +42,7 @@ MAPS = {
 }
 
 
-class TaxiFuelEnv(discrete.DiscreteEnv):
+class TaxiFuelEnv(DiscreteEnv):
     """
     The Taxi Problem
     from "Hierarchical Reinforcement Learning with the MAXQ Value Function Decomposition"
@@ -114,10 +114,10 @@ class TaxiFuelEnv(discrete.DiscreteEnv):
             if self.is_starting_state(state):
                 isd[state] += 1
             for action in range(number_of_actions):
-                done, new_state, reward = self.get_transition(action, state)
-                transitions[state][action].append((1.0, new_state, reward, done))
+                done, new_state, reward, info = self.get_transition(action, state)
+                transitions[state][action].append((1.0, new_state, reward, done, info))
         isd /= isd.sum()
-        discrete.DiscreteEnv.__init__(self, number_of_states, number_of_actions, transitions, isd)
+        DiscreteEnv.__init__(self, number_of_states, number_of_actions, transitions, isd)
 
     def is_starting_state(self, state):
         row, col, pass_idx, dest_idx, fuel = self.decode(state)
@@ -131,6 +131,11 @@ class TaxiFuelEnv(discrete.DiscreteEnv):
         done = False
         taxiloc = (row, col)
         new_fuel -= 1
+        info = {
+            'cost': 0,
+            'suc': False,
+            'fail': False
+        }
         if a == 0:
             new_row = min(row + 1, self.nR - 1)
         elif a == 1:
@@ -148,6 +153,7 @@ class TaxiFuelEnv(discrete.DiscreteEnv):
             if (taxiloc == self.locs[dest_idx]) and pass_idx == 4:
                 new_pass_idx = dest_idx
                 done = True
+                info['suc'] = True
                 reward = 20
             elif (taxiloc in self.locs) and pass_idx == 4:
                 new_pass_idx = self.locs.index(taxiloc)
@@ -161,9 +167,11 @@ class TaxiFuelEnv(discrete.DiscreteEnv):
         if new_fuel <= 0:
             new_fuel = 0
             reward = -20
+            info['fail'] = True
+            info['cost'] = 1
             done = True
         newstate = self.encode(new_row, new_col, new_pass_idx, dest_idx, new_fuel)
-        return done, newstate, reward
+        return done, newstate, reward, info
 
     def step(self, a):
         state, reward, done, info = super().step(a)

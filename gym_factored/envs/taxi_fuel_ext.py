@@ -17,6 +17,11 @@ class TaxiFuelExtEnv(TaxiFuelEnv):
         done = False
         taxiloc = (row, col)
         new_fuel -= 1
+        info = {
+            'cost': 0,
+            'suc': False,
+            'fail': False
+        }
         if a == 0:
             new_row = min(row + 1, self.nR - 1)
         elif a == 1:
@@ -41,14 +46,17 @@ class TaxiFuelExtEnv(TaxiFuelEnv):
                 if pass_idx == dest_idx:
                     done = True
                     reward = 20
+                    info['suc'] = True
             else:
                 reward = -10
         if new_fuel <= 0:
             new_fuel = 0
             reward = -20
+            info['fail'] = True
+            info['cost'] = 1
             done = True
         newstate = self.encode(new_row, new_col, new_pass_idx, dest_idx, new_fuel)
-        return done, newstate, reward
+        return done, newstate, reward, info
 
     def goal_state(self, state):
         dec_state = list(self.decode(state))

@@ -10,7 +10,7 @@ class TestChainEnv(unittest.TestCase):
     def test_non_absorbing_left(self):
         successors = self.env.P[0][1]
         self.assertEqual(len(successors), 1)
-        transition_prob, new_state, reward, done = successors[0]
+        transition_prob, new_state, reward, done, info = successors[0]
         self.assertAlmostEqual(transition_prob, 1)
         self.assertEqual(new_state, 1)
         self.assertEqual(reward, 0)
@@ -19,7 +19,7 @@ class TestChainEnv(unittest.TestCase):
     def test_non_absorbing_right(self):
         successors = self.env.P[3][0]
         self.assertEqual(len(successors), 1)
-        transition_prob, new_state, reward, done = successors[0]
+        transition_prob, new_state, reward, done, info = successors[0]
         self.assertAlmostEqual(transition_prob, 1)
         self.assertEqual(new_state, 2)
         self.assertEqual(reward, 0)
