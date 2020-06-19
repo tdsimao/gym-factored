@@ -61,6 +61,7 @@ class BridgeEnv(DiscreteEnv):
                     info["prob"] = p
                     info["suc"] = info.get("suc", False)
                     info["fail"] = info.get("fail", False)
+                    info["cost"] = int(info["fail"])
         DiscreteEnv.__init__(self, nS, nA, P, isd)
 
     def step(self, a):
