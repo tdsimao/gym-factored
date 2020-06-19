@@ -169,6 +169,7 @@ class TaxiFuelEnv(discrete.DiscreteEnv):
         state, reward, done, info = super().step(a)
         info['suc'] = self.goal_state(state)
         info['fail'] = self.out_of_fuel(state)
+        info['cost'] = int(self.out_of_fuel(state))
         return state, reward, done, info
 
     def goal_state(self, state):

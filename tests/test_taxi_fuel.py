@@ -14,6 +14,7 @@ class TestTaxiEnvs(unittest.TestCase):
         self.assertEqual(reward, 20)
         self.assertTrue(done)
         self.assertTrue(info['suc'])
+        self.assertEqual(info['cost'], 0)
 
     def test_taxi_failed_trial(self):
         env = gym.make("gym_factored:taxi-fuel-v0")
@@ -26,6 +27,7 @@ class TestTaxiEnvs(unittest.TestCase):
         self.assertEqual(reward, -20)
         self.assertTrue(done)
         self.assertTrue(info['fail'])
+        self.assertEqual(info['cost'], 1)
 
     def test_taxi_timout_trial(self):
         env = gym.make("gym_factored:taxi-fuel-v0")
@@ -37,6 +39,7 @@ class TestTaxiEnvs(unittest.TestCase):
             state, reward, done, info = env.step(6)
             self.assertEqual(state, env.encode(3, 2, 4, 0, 13))
             self.assertEqual(reward, -1)
+            self.assertEqual(info['cost'], 0)
             if done:
                 self.assertFalse(info['fail'])
                 self.assertFalse(info['suc'])
