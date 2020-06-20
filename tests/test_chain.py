@@ -15,6 +15,7 @@ class TestChainEnv(unittest.TestCase):
         state = self.env.reset()
         done = False
         reward = 0
+        info = {}
         for i in range(4):
             state, reward, done, info = self.env.step(0)
             if done:
@@ -22,11 +23,13 @@ class TestChainEnv(unittest.TestCase):
         self.assertEqual(state, 0)
         self.assertEqual(reward, 1)
         self.assertTrue(done)
+        self.assertEqual(info['cost'], 0)
 
     def test_move_right(self):
         state = self.env.reset()
         done = False
         reward = 0
+        info = {}
         for i in range(4):
             state, reward, done, info = self.env.step(1)
             if done:
@@ -34,4 +37,4 @@ class TestChainEnv(unittest.TestCase):
         self.assertEqual(reward, 10)
         self.assertTrue(done)
         self.assertEqual(state, 3)
-
+        self.assertEqual(info['cost'], 1)

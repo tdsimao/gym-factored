@@ -28,6 +28,7 @@ class ChainEnv(DiscreteEnv):
             if not terminal_states[s]:
                 isd[s] = 1
             for a in range(na):
+                info = {'cost': int(a == RIGHT)}
                 for new_state in range(ns):
                     transition_prob = t[s, a, new_state]
                     if transition_prob > 0:
@@ -38,7 +39,6 @@ class ChainEnv(DiscreteEnv):
                         else:
                             reward = 0
                         done = terminal_states[new_state]
-                        info = {}
                         p[s][a].append((transition_prob, new_state, reward, done, info))
         isd /= isd.sum()
         DiscreteEnv.__init__(self, ns, na, p, isd)
