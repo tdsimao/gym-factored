@@ -14,11 +14,9 @@ class ChainEnv(DiscreteEnv):
     """
 
     def __init__(self):
-        ns = 4
+        self.ns = ns = 4
         na = 2  # left and right
-        terminal_states = np.zeros(ns, dtype=bool)
-        terminal_states[0] = True
-        terminal_states[ns-1] = True
+        terminal_states = self.get_terminal_states()
 
         t = self.get_transition_function(na, ns)
 
@@ -28,13 +26,13 @@ class ChainEnv(DiscreteEnv):
             if not terminal_states[s]:
                 isd[s] = 1
             for a in range(na):
-                info = {'cost': int(a == RIGHT)}
+                info = {'cost': int((a == RIGHT) and not terminal_states[s])}
                 for new_state in range(ns):
                     transition_prob = t[s, a, new_state]
                     if transition_prob > 0:
-                        if new_state == ns-1:
+                        if (new_state == ns-1) and not terminal_states[s]:
                             reward = 10
-                        elif new_state == 0:
+                        elif (new_state == 0) and not terminal_states[s]:
                             reward = 1
                         else:
                             reward = 0
@@ -42,6 +40,12 @@ class ChainEnv(DiscreteEnv):
                         p[s][a].append((transition_prob, new_state, reward, done, info))
         isd /= isd.sum()
         DiscreteEnv.__init__(self, ns, na, p, isd)
+
+    def get_terminal_states(self):
+        terminal_states = np.zeros(self.ns, dtype=bool)
+        terminal_states[0] = True
+        terminal_states[self.ns - 1] = True
+        return terminal_states
 
     def get_transition_function(self, na, ns):
         t = np.zeros((ns, na, ns))
@@ -87,3 +91,6 @@ class NonAbsorbingChainEnv(ChainEnv):
         t[ns - 1, 0, ns - 1] = 0
         t[ns - 1, 0, ns - 2] = 1
         return t
+
+    def get_terminal_states(self):
+        return np.zeros(self.ns, dtype=bool)
