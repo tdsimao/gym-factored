@@ -15,6 +15,7 @@ class TestChainEnv(unittest.TestCase):
         self.assertEqual(new_state, 1)
         self.assertEqual(reward, 0)
         self.assertFalse(done)
+        self.assertEqual(info['cost'], 1)
 
     def test_non_absorbing_right(self):
         successors = self.env.P[3][0]
@@ -24,3 +25,4 @@ class TestChainEnv(unittest.TestCase):
         self.assertEqual(new_state, 2)
         self.assertEqual(reward, 0)
         self.assertFalse(done)
+        self.assertEqual(info['cost'], 0)
