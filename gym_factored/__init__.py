@@ -34,6 +34,21 @@ register(
     max_episode_steps=200
 )
 register(
+    id='chain2d-v0',
+    entry_point='gym_factored.envs.simple_chain2d:Chain2DEnv',
+    max_episode_steps=200
+)
+register(
+    id='slippery_chain2d-v0',
+    entry_point='gym_factored.envs.simple_chain2d:SlipperyChain2DEnv',
+    max_episode_steps=200
+)
+register(
+    id='non_absorbing_chain2d-v0',
+    entry_point='gym_factored.envs.simple_chain2d:NonAbsorbingChain2DEnv',
+    max_episode_steps=200
+)
+register(
     id='sysadmin-v0',
     entry_point='gym_factored.envs.sysadmin:SysAdminEnv',
     max_episode_steps=40,
