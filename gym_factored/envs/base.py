@@ -8,4 +8,13 @@ class DiscreteEnv(discrete.DiscreteEnv):
         p, s, r, d, info = transitions[i]
         self.s = s
         self.lastaction = a
-        return (s, r, d, info)
+        return s, r, d, info
+
+    def encode(self, *args):
+        raise NotImplementedError
+
+    def decode(self, state: int):
+        raise NotImplementedError
+
+    def render(self, mode='human'):
+        super().render()
