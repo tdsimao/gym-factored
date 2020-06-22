@@ -59,6 +59,12 @@ class ChainEnv(DiscreteEnv):
     def render(self, mode='human'):
         pass
 
+    def encode(self, x):
+        return x
+
+    def decode(self, i):
+        return reversed([i])
+
 
 def left(s):
     return max(s - 1, 0)
