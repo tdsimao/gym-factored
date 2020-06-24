@@ -31,19 +31,23 @@ class Chain2DEnv(DiscreteEnv):
             for a in range(na):
                 info = {'cost': self.get_cost(s, a)}
                 for new_state in range(ns):
-                    x, y = list(self.decode(new_state))
                     transition_prob = t[s, a, new_state]
                     if transition_prob > 0:
-                        if ((x == self.size-1) or (y == self.size-1)) and not terminal_states[s]:
-                            reward = 10
-                        elif ((x == 0) or (y == 0)) and not terminal_states[s]:
-                            reward = 1
-                        else:
-                            reward = 0
+                        reward = self.get_reward(s, a, new_state, terminal_states)
                         done = terminal_states[new_state]
                         p[s][a].append((transition_prob, new_state, reward, done, info))
         isd /= isd.sum()
         DiscreteEnv.__init__(self, ns, na, p, isd)
+
+    def get_reward(self, s, a, new_state, terminal_states):
+        x, y = list(self.decode(new_state))
+        if ((x == self.size - 1) or (y == self.size - 1)) and not terminal_states[s]:
+            reward = 10
+        elif ((x == 0) or (y == 0)) and not terminal_states[s]:
+            reward = 1
+        else:
+            reward = 0
+        return reward
 
     def get_cost(self, s, a):
         cost = {
@@ -134,3 +138,23 @@ class SlipperyChain2DEnv(Chain2DEnv):
 class NonAbsorbingChain2DEnv(Chain2DEnv):
     def get_terminal_states(self):
         return np.zeros(self.ns, dtype=bool)
+
+
+class NewChain2DEnv(Chain2DEnv):
+    """
+        in this environment the expected cost function is independent of the y position
+    """
+
+    def get_cost(self, s, a):
+        x, _ = list(self.decode(s))
+        cost = {
+            RIGHT: [2, 0],
+            LEFT: [1, 0],
+            UP: [0, 0],
+            DOWN: [0, 0],
+        }
+        if self.terminal_states[s]:
+            return 0
+        else:
+            return cost[a][x]
+
