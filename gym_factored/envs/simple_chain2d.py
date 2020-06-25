@@ -33,33 +33,45 @@ class Chain2DEnv(DiscreteEnv):
                 for new_state in range(ns):
                     transition_prob = t[s, a, new_state]
                     if transition_prob > 0:
-                        reward = self.get_reward(s, a, new_state, terminal_states)
+                        reward = self.get_reward(s, a, new_state)
                         done = terminal_states[new_state]
                         p[s][a].append((transition_prob, new_state, reward, done, info))
         isd /= isd.sum()
         DiscreteEnv.__init__(self, ns, na, p, isd)
 
-    def get_reward(self, s, a, new_state, terminal_states):
+    def get_reward(self, s, a, new_state):
+        if self.terminal_states[s]:
+            return 0
         x, y = list(self.decode(new_state))
-        if ((x == self.size - 1) or (y == self.size - 1)) and not terminal_states[s]:
-            reward = 10
-        elif ((x == 0) or (y == 0)) and not terminal_states[s]:
-            reward = 1
-        else:
-            reward = 0
-        return reward
+        if a in [UP, DOWN]:
+            if y in [0, self.size-1]:
+                return 1
+        if a in [LEFT, RIGHT]:
+            if x == 0:
+                if y == 1:
+                    return 2
+                if y == 2:
+                    return 3
+            if x == self.size-1:
+                if y == 1:
+                    return 10
+                if y == 2:
+                    return -10
+        return 0
 
     def get_cost(self, s, a):
+        x, _ = list(self.decode(s))
         cost = {
-            RIGHT: 1,
-            LEFT: 0,
-            UP: 0,
-            DOWN: 2,
+            RIGHT: [0, 2],
+            LEFT: [1, 0],
+            UP: [0, 0],
+            DOWN: [0, 0],
         }
         if self.terminal_states[s]:
             return 0
         else:
-            return cost[a]
+            return cost[a][x - 1]
+
 
     def get_terminal_states(self):
         terminal_states = np.zeros(self.ns, dtype=bool)
@@ -85,14 +97,14 @@ class Chain2DEnv(DiscreteEnv):
         pass
 
     def encode(self, x, y):
-        return x * self.size + y
+        return y * self.size + x
 
     def decode(self, i):
         out = [i % self.size]
         i = i // self.size
         out.append(i)
-        assert 0 <= i < self.ns
-        return reversed(out)
+        assert 0 <= i < self.size
+        return out
 
     def left(self, s):
         x, y = list(self.decode(s))
@@ -138,23 +150,3 @@ class SlipperyChain2DEnv(Chain2DEnv):
 class NonAbsorbingChain2DEnv(Chain2DEnv):
     def get_terminal_states(self):
         return np.zeros(self.ns, dtype=bool)
-
-
-class NewChain2DEnv(Chain2DEnv):
-    """
-        in this environment the expected cost function is independent of the y position
-    """
-
-    def get_cost(self, s, a):
-        x, _ = list(self.decode(s))
-        cost = {
-            RIGHT: [2, 0],
-            LEFT: [1, 0],
-            UP: [0, 0],
-            DOWN: [0, 0],
-        }
-        if self.terminal_states[s]:
-            return 0
-        else:
-            return cost[a][x]
-

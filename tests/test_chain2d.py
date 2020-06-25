@@ -26,12 +26,18 @@ class TestChain2DEnv(unittest.TestCase):
                     state, reward, done, info = self.env.step(0)
                     if done:
                         break
+                    else:
+                        self.assertEqual(reward, 0)
+                        self.assertEqual(info['cost'], 0)
                 x, y = list(self.env.decode(state))
                 self.assertEqual(y, y0)
                 self.assertEqual(x, 0)
-                self.assertEqual(reward, 1)
+                if y == 1:
+                    self.assertEqual(reward, 2)
+                else:
+                    self.assertEqual(reward, 3)
                 self.assertTrue(done)
-                self.assertEqual(info['cost'], 0)
+                self.assertEqual(info['cost'], 1)
 
     def test_move_right(self):
         for s in INITIAL_STATES:
@@ -46,12 +52,18 @@ class TestChain2DEnv(unittest.TestCase):
                     state, reward, done, info = self.env.step(1)
                     if done:
                         break
+                    else:
+                        self.assertEqual(reward, 0)
+                        self.assertEqual(info['cost'], 0)
                 x, y = list(self.env.decode(state))
                 self.assertEqual(y, y0)
                 self.assertEqual(x, 3)
-                self.assertEqual(reward, 10)
+                if y == 1:
+                    self.assertEqual(reward, 10)
+                else:
+                    self.assertEqual(reward, -10)
                 self.assertTrue(done)
-                self.assertEqual(info['cost'], 1)
+                self.assertEqual(info['cost'], 2)
 
     def test_move_up(self):
         for s in INITIAL_STATES:
@@ -66,6 +78,9 @@ class TestChain2DEnv(unittest.TestCase):
                     state, reward, done, info = self.env.step(2)
                     if done:
                         break
+                    else:
+                        self.assertEqual(reward, 0)
+                        self.assertEqual(info['cost'], 0)
                 x, y = list(self.env.decode(state))
                 self.assertEqual(x, x0)
                 self.assertEqual(y, 0)
@@ -86,12 +101,16 @@ class TestChain2DEnv(unittest.TestCase):
                     state, reward, done, info = self.env.step(3)
                     if done:
                         break
+                    else:
+                        self.assertEqual(reward, 0)
+                        self.assertEqual(info['cost'], 0)
                 x, y = list(self.env.decode(state))
                 self.assertEqual(x, x0)
                 self.assertEqual(y, 3)
-                self.assertEqual(reward, 10)
+                self.assertEqual(reward, 1)
                 self.assertTrue(done)
-                self.assertEqual(info['cost'], 2)
+                self.assertEqual(info['cost'], 0)
+
 
 class TestSlipperyChain2DEnv(unittest.TestCase):
     @classmethod
