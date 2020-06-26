@@ -17,4 +17,4 @@ class DiscreteEnv(discrete.DiscreteEnv):
         raise NotImplementedError
 
     def render(self, mode='human'):
-        super().render()
+        super().render(mode)
