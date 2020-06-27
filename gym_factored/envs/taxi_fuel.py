@@ -3,6 +3,7 @@ code from [RLBase repo][https://github.com/canmanietp/RLBase] by @canmanietp wit
 """
 import sys
 from six import StringIO
+from contextlib import closing
 from gym import utils
 from gym_factored.envs.base import DiscreteEnv
 import numpy as np
@@ -246,4 +247,5 @@ class TaxiFuelEnv(DiscreteEnv):
 
         # No need to return anything for human
         if mode != 'human':
-            return outfile
+            with closing(outfile):
+                return outfile
