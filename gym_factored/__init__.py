@@ -90,3 +90,8 @@ register(
         'max_swimming_len': 5
     },
 )
+register(
+    id='cliff_walking_cost-v0',
+    max_episode_steps=100,
+    entry_point='gym_factored.envs.cliff_walking:CliffWalkingCostEnv',
+)
