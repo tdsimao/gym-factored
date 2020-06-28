@@ -17,8 +17,9 @@ class TestCliffWalking(unittest.TestCase):
 
         for i in range(3):
             with self.subTest():
-                cost_env.reset()
-                original_env.reset()
+                state_a = cost_env.reset()
+                state_b = original_env.reset()
+                self.assertEqual(state_a, state_b)
                 done_a = False
                 while not done_a:
                     action = cost_env.action_space.sample()
@@ -26,7 +27,8 @@ class TestCliffWalking(unittest.TestCase):
                     state_b, reward_b, done_b, info_b = original_env.step(action)
                     self.assertEqual(state_a, state_b)
                     self.assertEqual(reward_a, reward_b)
-                    self.assertEqual(done_a, done_b)
+                    if not info_a.get('TimeLimit.truncated', False):
+                        self.assertEqual(done_a, done_b)
 
     def test_cost(self):
         env = gym.make("gym_factored:cliff_walking_cost-v0")
