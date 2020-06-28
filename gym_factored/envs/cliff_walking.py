@@ -33,15 +33,17 @@ class CliffWalkingCostEnv(DiscreteEnv):
 
     metadata = {'render.modes': ['human', 'ansi']}
 
-    def __init__(self):
-        self.shape = (4, 12)
-        self.start_state_index = self.encode(3, 0)
-        ns = int(np.prod(self.shape))
+    def __init__(self, num_rows=4, num_cols=12):
+
+        self.shape = (self.num_rows, self.num_cols) = (num_rows, num_cols)
+        self.start_state_index = self.encode(self.num_rows-1, 0)
+        self.terminal_state = (self.num_rows - 1, self.num_cols - 1)
+        ns = num_rows * num_cols
         na = 4
 
         # Cliff Location
         self._cliff = np.zeros(self.shape, dtype=np.bool)
-        self._cliff[3, 1:-1] = True
+        self._cliff[self.num_rows-1, 1:-1] = True
 
         # Calculate transition probabilities, rewards and costs
         transitions = {}
@@ -60,16 +62,15 @@ class CliffWalkingCostEnv(DiscreteEnv):
 
         super().__init__(ns, na, transitions, isd)
 
-
     def _limit_coordinates(self, coord):
         """
         Prevent the agent from falling out of the grid world
         :param coord:
         :return:
         """
-        coord[0] = min(coord[0], self.shape[0] - 1)
+        coord[0] = min(coord[0], self.num_rows - 1)
         coord[0] = max(coord[0], 0)
-        coord[1] = min(coord[1], self.shape[1] - 1)
+        coord[1] = min(coord[1], self.num_cols - 1)
         coord[1] = max(coord[1], 0)
         return coord
 
@@ -94,11 +95,9 @@ class CliffWalkingCostEnv(DiscreteEnv):
             reward = -100
         else:
             new_state = self.encode(*new_position)
-            terminal_state = (self.shape[0] - 1, self.shape[1] - 1)
-            is_done = tuple(new_position) == terminal_state
+            is_done = tuple(new_position) == self.terminal_state
             reward = -1
         return [(prob, new_state, reward, is_done, info)]
-
 
     def render(self, mode='human'):
         outfile = StringIO() if mode == 'ansi' else sys.stdout
@@ -108,7 +107,7 @@ class CliffWalkingCostEnv(DiscreteEnv):
             if self.s == s:
                 output = " x "
             # Print terminal state
-            elif position == (3, 11):
+            elif position == self.terminal_state:
                 output = " T "
             elif self._cliff[position]:
                 output = " C "
@@ -117,7 +116,7 @@ class CliffWalkingCostEnv(DiscreteEnv):
 
             if position[1] == 0:
                 output = output.lstrip()
-            if position[1] == self.shape[1] - 1:
+            if position[1] == self.num_cols - 1:
                 output = output.rstrip()
                 output += '\n'
 
@@ -136,8 +135,8 @@ class CliffWalkingCostEnv(DiscreteEnv):
         return np.ravel_multi_index(tuple(values), self.shape)
 
     def _get_cost(self, row, col):
-        if row in [0, self.shape[0] - 1]:
+        if row in [0, self.num_rows - 1]:
             return 0
-        if col in [0, self.shape[1] - 1]:
+        if col in [0, self.num_cols - 1]:
             return 0
         return row
