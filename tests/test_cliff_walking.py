@@ -56,3 +56,37 @@ class TestCliffWalking(unittest.TestCase):
         self.assertEqual(info['cost'], 0)
         _, _, _, info = env.step(DOWN)
         self.assertEqual(info['cost'], 0)
+
+    def test_4_by_3_initial_state(self):
+        env = gym.make("gym_factored:cliff_walking_cost-v0", num_cols=3)
+        state = env.reset()
+        self.assertEqual(state, 9)
+        state, reward, done, info = env.step(RIGHT)
+        self.assertEqual(state, 9)
+        self.assertEqual(reward, -100)
+        self.assertEqual(info.get('cost'), 0)
+        self.assertFalse(done)
+
+    def test_4_by_3_goal_state(self):
+        env = gym.make("gym_factored:cliff_walking_cost-v0", num_cols=3)
+        env.reset()
+        env.unwrapped.s = env.encode(3, 2)
+        state, reward, done, info = env.step(DOWN)
+        self.assertEqual(state, 11)
+        self.assertEqual(reward, -1)
+        self.assertTrue(done)
+        self.assertEqual(info.get('cost'), 0)
+
+    def test_5_by_3_goal_state(self):
+        env = gym.make("gym_factored:cliff_walking_cost-v0", num_cols=3, num_rows=5)
+        env.reset()
+        env.unwrapped.s = env.encode(0, 1)
+        state, reward, done, info = env.step(DOWN)
+        self.assertEqual(info.get('cost'), 1)
+        state, reward, done, info = env.step(DOWN)
+        self.assertEqual(info.get('cost'), 2)
+        state, reward, done, info = env.step(DOWN)
+        self.assertEqual(info.get('cost'), 3)
+        state, reward, done, info = env.step(DOWN)
+        self.assertEqual(state, 12)
+        self.assertEqual(info.get('cost'), 0)
