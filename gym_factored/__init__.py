@@ -99,3 +99,12 @@ register(
         'num_cols': 12
     },
 )
+
+register(
+    id='cmdp-v0',
+    max_episode_steps=6,
+    entry_point='gym_factored.envs.simple_cmdp:CMDPEnv',
+    kwargs={
+        'ns': 3
+    },
+)
