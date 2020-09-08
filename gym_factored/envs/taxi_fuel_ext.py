@@ -31,12 +31,12 @@ class TaxiFuelExtEnv(TaxiFuelEnv):
         elif a == 3 and self.desc[1 + row, 2 * col] == b":":
             new_col = max(col - 1, 0)
         elif a == 4:  # pickup
-            if pass_idx < 4 and taxiloc == self.locs[pass_idx]:
-                new_pass_idx = 4
+            if pass_idx < len(self.locs) and taxiloc == self.locs[pass_idx]:
+                new_pass_idx = len(self.locs)
             else:
                 reward = -10
         elif a == 5:  # dropoff
-            if (taxiloc in self.locs) and pass_idx == 4:
+            if (taxiloc in self.locs) and pass_idx == len(self.locs):
                 new_pass_idx = self.locs.index(taxiloc)
             else:
                 reward = -10

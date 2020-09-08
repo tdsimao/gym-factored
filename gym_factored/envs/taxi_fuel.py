@@ -10,6 +10,20 @@ import numpy as np
 
 
 MAPS = {
+    "2x2": [
+        "+---+",
+        "|R: |",
+        "| |B|",
+        "+---+",
+    ],
+    "4x4": [
+        "+-------+",
+        "|R: | : |",
+        "| : | : |",
+        "| : : : |",
+        "| | : |B|",
+        "+-------+",
+    ],
     "5x5": [
         "+---------+",
         "|R: | : :G|",
@@ -107,6 +121,14 @@ class TaxiFuelEnv(DiscreteEnv):
         self.nR, self.nC = [int(n) for n in map_name.split('x')]
         self.min_starting_fuel = 2 + (self.nR - 3) + (self.nC - 3)
 
+        if map_name == "4x4":
+            self.locs = [(0, 0), (3, 3)]
+            self.fuel_location = (2, 1)
+        if map_name == "2x2":
+            self.locs = [(0, 0), (1, 1)]
+            self.fuel_location = (1, 0)
+            self.min_starting_fuel = fuel_capacity - 1
+
         number_of_states = self.nR * self.nC * (len(self.locs) + 1) * len(self.locs) * fuel_capacity
         isd = np.zeros(number_of_states)
         number_of_actions = 7
@@ -122,7 +144,7 @@ class TaxiFuelEnv(DiscreteEnv):
 
     def is_starting_state(self, state):
         row, col, pass_idx, dest_idx, fuel = self.decode(state)
-        starting_state = pass_idx < 4 and pass_idx != dest_idx and fuel >= self.min_starting_fuel
+        starting_state = pass_idx < len(self.locs) and pass_idx != dest_idx and fuel >= self.min_starting_fuel
         return starting_state
 
     def get_transition(self, a, state):
@@ -146,12 +168,12 @@ class TaxiFuelEnv(DiscreteEnv):
         elif a == 3 and self.desc[1 + row, 2 * col] == b":":
             new_col = max(col - 1, 0)
         elif a == 4:  # pickup
-            if pass_idx < 4 and taxiloc == self.locs[pass_idx]:
-                new_pass_idx = 4
+            if pass_idx < len(self.locs) and taxiloc == self.locs[pass_idx]:
+                new_pass_idx = len(self.locs)
             else:
                 reward = -10
         elif a == 5:  # dropoff
-            if (taxiloc == self.locs[dest_idx]) and pass_idx == 4:
+            if (taxiloc == self.locs[dest_idx]) and pass_idx == len(self.locs):
                 new_pass_idx = dest_idx
                 done = True
                 info['suc'] = True
@@ -226,7 +248,7 @@ class TaxiFuelEnv(DiscreteEnv):
 
         out[1 + self.fuel_location[0]][2 * self.fuel_location[1] + 1] = "F"
         out.append("|" + "█" * fuel + " " * (self.fuel_capacity - fuel - 1) + "|")
-        if passidx < 4:
+        if passidx < len(self.locs):
             out[1 + taxirow][2 * taxicol + 1] = utils.colorize(out[1 + taxirow][2 * taxicol + 1], 'yellow',
                                                                highlight=True)
             pi, pj = self.locs[passidx]
