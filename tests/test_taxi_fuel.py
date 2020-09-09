@@ -66,14 +66,12 @@ class TestTaxiEnvs(unittest.TestCase):
     def test_taxi_tiny(self):
         env = gym.make("gym_factored:taxi-fuel-tiny-v0")
         env.reset()
-        print(env.nS)
-        print(list(env.decode(120)))
         # move agent next to refuel station
         env.unwrapped.s = env.encode(1, 0, 0, 1, 1)
         # take as many steps as possible
         while True:
             state, reward, done, info = env.step(6)
-            self.assertEqual(state, env.encode(1, 0, 0, 1, 5))
+            self.assertEqual(state, env.encode(1, 0, 0, 1, 4))
             self.assertEqual(reward, -1)
             self.assertEqual(info['cost'], 0)
             if done:

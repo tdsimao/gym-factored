@@ -13,7 +13,7 @@ MAPS = {
     "2x2": [
         "+---+",
         "|R: |",
-        "| |B|",
+        "| :B|",
         "+---+",
     ],
     "4x4": [
@@ -196,12 +196,12 @@ class TaxiFuelEnv(DiscreteEnv):
         newstate = self.encode(new_row, new_col, new_pass_idx, dest_idx, new_fuel)
         return done, newstate, reward, info
 
-    def step(self, a):
-        state, reward, done, info = super().step(a)
-        info['suc'] = self.goal_state(state)
-        info['fail'] = self.out_of_fuel(state)
-        info['cost'] = int(self.out_of_fuel(state))
-        return state, reward, done, info
+    # def step(self, a):
+    #     state, reward, done, info = super().step(a)
+    #     info['suc'] = self.goal_state(state)
+    #     info['fail'] = self.out_of_fuel(state)
+    #     info['cost'] = int(self.out_of_fuel(state))
+    #     return state, reward, done, info
 
     def goal_state(self, state):
         dec_state = list(self.decode(state))
