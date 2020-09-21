@@ -10,17 +10,8 @@ register(
     }
 )
 register(
-    id='taxi-fuel-ext-v0',
-    entry_point='gym_factored.envs.taxi_fuel_ext:TaxiFuelExtEnv',
-    max_episode_steps=200,
-    kwargs={
-        'fuel_capacity': 14,
-        'map_name': "5x5",
-    }
-)
-register(
     id='taxi-fuel-small-v0',
-    entry_point='gym_factored.envs.taxi_fuel_ext:TaxiFuelExtEnv',
+    entry_point='gym_factored.envs.taxi_fuel:TaxiFuelEnv',
     max_episode_steps=40,
     kwargs={
         'fuel_capacity': 10,
@@ -29,10 +20,10 @@ register(
 )
 register(
     id='taxi-fuel-tiny-v0',
-    entry_point='gym_factored.envs.taxi_fuel_ext:TaxiFuelExtEnv',
-    max_episode_steps=8,
+    entry_point='gym_factored.envs.taxi_fuel:TaxiFuelEnv',
+    max_episode_steps=5,
     kwargs={
-        'fuel_capacity': 5,
+        'fuel_capacity': 4,
         'map_name': "2x2",
     }
 )

@@ -129,7 +129,7 @@ class TaxiFuelEnv(DiscreteEnv):
             self.fuel_location = (1, 0)
             self.min_starting_fuel = fuel_capacity - 1
 
-        number_of_states = self.nR * self.nC * (len(self.locs) + 1) * len(self.locs) * fuel_capacity
+        number_of_states = self.nR * self.nC * (len(self.locs) + 2) * len(self.locs) * fuel_capacity
         isd = np.zeros(number_of_states)
         number_of_actions = 7
         transitions = {s: {a: [] for a in range(number_of_actions)} for s in range(number_of_states)}
@@ -174,10 +174,8 @@ class TaxiFuelEnv(DiscreteEnv):
                 reward = -10
         elif a == 5:  # dropoff
             if (taxiloc == self.locs[dest_idx]) and pass_idx == len(self.locs):
-                new_pass_idx = dest_idx
-                done = True
-                info['suc'] = True
                 reward = 20
+                new_pass_idx = len(self.locs) + 1  # passenger delivered
             elif (taxiloc in self.locs) and pass_idx == 4:
                 new_pass_idx = self.locs.index(taxiloc)
             else:
@@ -196,26 +194,11 @@ class TaxiFuelEnv(DiscreteEnv):
         newstate = self.encode(new_row, new_col, new_pass_idx, dest_idx, new_fuel)
         return done, newstate, reward, info
 
-    # def step(self, a):
-    #     state, reward, done, info = super().step(a)
-    #     info['suc'] = self.goal_state(state)
-    #     info['fail'] = self.out_of_fuel(state)
-    #     info['cost'] = int(self.out_of_fuel(state))
-    #     return state, reward, done, info
-
-    def goal_state(self, state):
-        dec_state = list(self.decode(state))
-        return dec_state[2] == dec_state[3]
-
-    def out_of_fuel(self, state):
-        dec_state = list(self.decode(state))
-        return dec_state[4] == 0
-
     def encode(self, taxirow, taxicol, passloc, destidx, fuel):
         i = taxirow
         i *= self.nC
         i += taxicol
-        i *= (len(self.locs) + 1)
+        i *= (len(self.locs) + 2)
         i += passloc
         i *= (len(self.locs))
         i += destidx
@@ -228,8 +211,8 @@ class TaxiFuelEnv(DiscreteEnv):
         i = i // self.fuel_capacity
         out.append(i % len(self.locs))
         i = i // len(self.locs)
-        out.append(i % (len(self.locs) + 1))
-        i = i // (len(self.locs) + 1)
+        out.append(i % (len(self.locs) + 2))
+        i = i // (len(self.locs) + 2)
         out.append(i % self.nC)
         i = i // self.nC
         out.append(i)

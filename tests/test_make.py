@@ -16,19 +16,20 @@ class TestMakeEnvs(unittest.TestCase):
     def test_make_taxi(self):
         env = gym.make("gym_factored:taxi-fuel-v0")
         state = env.reset()
-        self.assertIn(state, range(7000))
+        print(env.nS)
+        self.assertIn(state, range(8400))
 
     def test_make_taxi_map(self):
         env = gym.make("gym_factored:taxi-fuel-v0", map_name="5x5")
         state = env.reset()
-        self.assertIn(state, range(7000))
+        self.assertIn(state, range(8400))
 
     def test_make_taxi_different_map(self):
         env = gym.make("gym_factored:taxi-fuel-v0", map_name="7x7")
         state = env.reset()
-        self.assertIn(state, range(13720))
-        self.assertIn(13720-1, env.P)
-        self.assertEqual(len(env.P), 13720)
+        self.assertIn(state, range(16464))
+        self.assertIn(16463, env.P)
+        self.assertEqual(len(env.P), 16464)
 
     def test_make_taxi_invalid_map(self):
         with self.assertRaises(AssertionError):
