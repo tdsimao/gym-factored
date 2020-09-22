@@ -8,12 +8,11 @@ class TestTaxiEnvs(unittest.TestCase):
         env.reset()
         # move agent next to goal state
         env.unwrapped.s = env.encode(0, 0, 4, 0, 10)
-        # move to goal state
+        # drop passenger at destination
         state, reward, done, info = env.step(5)
-        self.assertEqual(state, env.encode(0, 0, 0, 0, 9))
+        self.assertEqual(state, env.encode(0, 0, 5, 0, 9))
         self.assertEqual(reward, 20)
-        self.assertTrue(done)
-        self.assertTrue(info['suc'])
+        self.assertFalse(done)  # episode only ends if out of fuel or end of horizon
         self.assertEqual(info['cost'], 0)
 
     def test_taxi_failed_trial(self):
@@ -71,7 +70,7 @@ class TestTaxiEnvs(unittest.TestCase):
         # take as many steps as possible
         while True:
             state, reward, done, info = env.step(6)
-            self.assertEqual(state, env.encode(1, 0, 0, 1, 4))
+            self.assertEqual(state, env.encode(1, 0, 0, 1, 3))
             self.assertEqual(reward, -1)
             self.assertEqual(info['cost'], 0)
             if done:
