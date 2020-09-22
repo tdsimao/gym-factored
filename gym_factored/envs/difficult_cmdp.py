@@ -27,8 +27,10 @@ class DifficultCMDPEnv(DiscreteEnv):
             x, y = list(self.decode(s))
             for a in range(na):
                 if x == 0:
-                    p[s][a].append((prob_y_zero, self.encode(1, 0), 0, False, {}))
-                    p[s][a].append((1 - prob_y_zero, self.encode(1, 1), 0, False, {}))
+                    if prob_y_zero > 0:
+                        p[s][a].append((prob_y_zero, self.encode(1, 0), 0, False, {}))
+                    if 1 - prob_y_zero:
+                        p[s][a].append((1 - prob_y_zero, self.encode(1, 1), 0, False, {}))
                 elif x == 1:
                     cost = int(a == A)
                     info = {'cost': cost}
