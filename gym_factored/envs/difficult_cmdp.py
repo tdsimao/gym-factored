@@ -41,7 +41,7 @@ class DifficultCMDPEnv(DiscreteEnv):
                         p[s][a].append((1, self.encode(2, y), int(a == A), done, info))
                 else:
                     p[s][a].append((1, s, 0, True, {}))
-        DiscreteEnv.__init__(self, ns, na, p, isd)
+        DiscreteEnv.__init__(self, ns, na, p, isd, domains=self.domains)
 
     def render(self, mode='human'):
         outfile = StringIO() if mode == 'ansi' else sys.stdout
@@ -53,17 +53,3 @@ class DifficultCMDPEnv(DiscreteEnv):
         outfile.write("last action: {}\n".format(self.lastaction) if self.lastaction is not None else "")
         if mode != 'human':
             return outfile
-
-    def encode(self, *args):
-        res = 0
-        for value, domain in zip(args, self.domains):
-            res *= len(domain)
-            res += value
-        return res
-
-    def decode(self, i):
-        out = [i % len(self.domains[1])]
-        i = i // len(self.domains[1])
-        out.append(i)
-        assert 0 <= i < len(self.domains[0])
-        return reversed(out)

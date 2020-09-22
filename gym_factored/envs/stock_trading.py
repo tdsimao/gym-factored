@@ -1,10 +1,10 @@
-from gym.envs.toy_text import discrete
+from gym_factored.envs.base import DiscreteEnv
 import numpy as np
 import sys
 from six import StringIO
 
 
-class StockTradingEnv(discrete.DiscreteEnv):
+class StockTradingEnv(DiscreteEnv):
     """
     The StockTrading Problem
         Strehl, A. L.; Diuk, C.; and Littman, M. L. 2007.
@@ -72,10 +72,10 @@ class StockTradingEnv(discrete.DiscreteEnv):
                             break
                     if p > 0:
                         total_p += p
-                        P[s][a].append((p, ns, reward, False))
+                        P[s][a].append((p, ns, reward, False, {}))
                 assert abs(1 - total_p) < 0.0000001
         isd /= isd.sum()
-        discrete.DiscreteEnv.__init__(self, nS, nA, P, isd)
+        DiscreteEnv.__init__(self, nS, nA, P, isd)
 
     def stocks_from_sector(self, sector):
         sectors_stocks = range(sector * (self.stocks_per_sector + 1) + 1, (sector + 1) * (self.stocks_per_sector + 1))
