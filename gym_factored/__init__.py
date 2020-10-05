@@ -21,9 +21,9 @@ register(
 register(
     id='taxi-fuel-tiny-v0',
     entry_point='gym_factored.envs.taxi_fuel:TaxiFuelEnv',
-    max_episode_steps=5,
+    max_episode_steps=8,
     kwargs={
-        'fuel_capacity': 4,
+        'fuel_capacity': 5,
         'map_name': "2x2",
     }
 )
