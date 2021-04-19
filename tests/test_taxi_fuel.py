@@ -70,7 +70,7 @@ class TestTaxiEnvs(unittest.TestCase):
         # take as many steps as possible
         while True:
             state, reward, done, info = env.step(6)
-            self.assertEqual(state, env.encode(1, 0, 0, 1, 3))
+            self.assertEqual(state, env.encode(1, 0, 0, 1, 4))
             self.assertEqual(reward, -1)
             self.assertEqual(info['cost'], 0)
             if done:
