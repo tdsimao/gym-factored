@@ -42,7 +42,7 @@ class CliffWalkingCostEnv(DiscreteEnv):
         na = 4
 
         # Cliff Location
-        self._cliff = np.zeros(self.shape, dtype=np.bool)
+        self._cliff = np.zeros(self.shape, dtype=bool)
         self._cliff[self.num_rows-1, 1:-1] = True
 
         # Calculate transition probabilities, rewards and costs
