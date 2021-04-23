@@ -124,3 +124,13 @@ register(
         'prob_y_zero': 0.1
     },
 )
+
+register(
+    id='cost_chain-v0',
+    max_episode_steps=2,
+    entry_point='gym_factored.envs.cost_chain:CostChainEnv',
+    kwargs={
+        'prob_y_zero': 0.1,
+        'n': 3
+    },
+)
