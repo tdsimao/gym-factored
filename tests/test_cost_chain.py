@@ -3,7 +3,7 @@ import gym
 import numpy as np
 
 
-class TestCostChainPEnv(unittest.TestCase):
+class TestCostChainEnv(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.p = np.random.random()
