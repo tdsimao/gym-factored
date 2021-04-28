@@ -13,15 +13,15 @@ RESET = 2
 
 class CostChainEnv(DiscreteEnv):
     """
-    A difficult CMDP environment
+    A chain with costs
     """
 
     def __init__(self, prob_y_zero=0.1, n=3):
         self.domains = [range(n), [0, 1]]
-        self.ns = ns = 6
+        self.ns = ns = 2 * n
         na = 3
 
-        isd = np.zeros(2 * n)
+        isd = np.zeros(ns)
         isd[0:2] = [0.5, 0.5]
         p = {s: {a: [] for a in range(na)} for s in range(ns)}
         for s in range(ns):
@@ -32,22 +32,23 @@ class CostChainEnv(DiscreteEnv):
                     info = {'cost': 0}
                     p[s][a].append((1, self.encode(0, y), 0, done, info))
                     continue
-                if x == 0:
-                    if prob_y_zero > 0:
-                        p[s][a].append((prob_y_zero, self.encode(1, 0), 0, False, {}))
-                    if 1 - prob_y_zero:
-                        p[s][a].append((1 - prob_y_zero, self.encode(1, 1), 0, False, {}))
-                elif x == 1:
-                    cost = int(a == A)
-                    info = {'cost': cost}
-                    done = True
-                    if y == 0:
-                        p[s][a].append((1, self.encode(2, y), int(a == B), done, info))
-                    else:
-                        p[s][a].append((1, self.encode(2, y), int(a == A), done, info))
-                else:
+                if x == n-1:
                     p[s][a].append((1, s, 0, True, {}))
-
+                elif not (x % 2):
+                    reward = 0
+                    cost = 0
+                    done = False
+                    if prob_y_zero > 0:
+                        p[s][a].append((prob_y_zero, self.encode(x+1, 0), reward, done, {'cost': cost}))
+                    if prob_y_zero < 1:
+                        p[s][a].append((1 - prob_y_zero, self.encode(x+1, 1), reward, done, {'cost': cost}))
+                elif x % 2:
+                    cost = int(a == A)
+                    done = False
+                    if y == 0:
+                        p[s][a].append((1, self.encode(x+1, y), int(a == B), done, {'cost': cost}))
+                    else:
+                        p[s][a].append((1, self.encode(x+1, y), int(a == A), done, {'cost': cost}))
         DiscreteEnv.__init__(self, ns, na, p, isd, domains=self.domains)
 
     def render(self, mode='human'):
