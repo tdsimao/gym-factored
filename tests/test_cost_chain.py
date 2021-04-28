@@ -6,6 +6,7 @@ import numpy as np
 class TestCostChainEnv(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
+        cls.p = 0.1
         cls.env = gym.make('gym_factored:small_cost_chain-v0')
 
     def test_reset_env(self):
@@ -85,4 +86,18 @@ class TestCostChainEnv(unittest.TestCase):
             self.env.reset()
             state, _, _, _ = self.env.step(1)
             total += int(state == 2)
-        np.testing.assert_almost_equal(0.1, total/repetitions, decimal=2)
+        np.testing.assert_almost_equal(self.p, total/repetitions, decimal=2)
+
+
+class TestCostChain1Env(TestCostChainEnv):
+    @classmethod
+    def setUpClass(cls):
+        cls.p = 1
+        cls.env = gym.make('gym_factored:small_cost_chain-v0', prob_y_zero=cls.p)
+
+
+class TestCostChain0Env(TestCostChainEnv):
+    @classmethod
+    def setUpClass(cls):
+        cls.p = 0
+        cls.env = gym.make('gym_factored:small_cost_chain-v0', prob_y_zero=cls.p)
