@@ -33,7 +33,8 @@ class CostChainEnv(DiscreteEnv):
                     p[s][a].append((1, self.encode(0, y), 0, done, info))
                     continue
                 if x == n-1:
-                    p[s][a].append((1, s, 0, True, {}))
+                    done = True
+                    p[s][a].append((1, s, 0, done,  {'cost': 0}))
                 elif not (x % 2):
                     reward = 0
                     cost = 0
