@@ -6,12 +6,11 @@ import numpy as np
 class TestCostChainEnv(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.p = np.random.random()
-        cls.env = gym.make("gym_factored:cost_chain-v0", prob_y_zero=cls.p, n=3)
+        cls.env = gym.make('gym_factored:small_cost_chain-v0')
 
     def test_reset_env(self):
         ob = self.env.reset()
-        self.assertIn(ob, range(6))
+        self.assertIn(ob, range(2))
 
     def test_encode(self):
         self.env.reset()
@@ -39,7 +38,12 @@ class TestCostChainEnv(unittest.TestCase):
             self.assertEqual(middle_state, 3)
             self.assertEqual(reward, 1)
         self.assertEqual(info['cost'], 1)
+        self.assertFalse(done)
+        self.assertIn(final_state, [4, 5])
+        final_state, reward, done, info = self.env.step(0)
         self.assertTrue(done)
+        self.assertEqual(reward, 0)
+        self.assertEqual(info['cost'], 0)
         self.assertIn(final_state, [4, 5])
 
     def test_b(self):
@@ -51,21 +55,27 @@ class TestCostChainEnv(unittest.TestCase):
         else:
             self.assertEqual(reward, 0)
         self.assertEqual(info['cost'], 0)
+        self.assertFalse(done)
+        self.assertIn(final_state, [4, 5])
+        final_state, reward, done, info = self.env.step(1)
         self.assertTrue(done)
+        self.assertEqual(reward, 0)
+        self.assertEqual(info['cost'], 0)
         self.assertIn(final_state, [4, 5])
 
     def test_reset(self):
         initial_state = self.env.reset()
-        state, reward, done, info = self.env.step(2)
-        self.assertEqual(list(self.env.decode(initial_state)), list(self.env.decode(state)))
-        self.assertEqual(reward, 0)
-        self.assertEqual(info['cost'], 0)
-        self.assertFalse(done)
+        for _ in range(5):
+            state, reward, done, info = self.env.step(2)
+            self.assertEqual(list(self.env.decode(initial_state)), list(self.env.decode(state)))
+            self.assertEqual(reward, 0)
+            self.assertEqual(info['cost'], 0)
+            self.assertFalse(done)
         final_state, reward, done, info = self.env.step(2)
+        self.assertEqual(list(self.env.decode(initial_state)), list(self.env.decode(final_state)))
         self.assertEqual(reward, 0)
         self.assertEqual(info['cost'], 0)
         self.assertTrue(done)
-        self.assertIn(state, [0, 1])
 
     def test_stochastic_transition(self):
         repetitions = 20000
@@ -75,4 +85,4 @@ class TestCostChainEnv(unittest.TestCase):
             self.env.reset()
             state, _, _, _ = self.env.step(1)
             total += int(state == 2)
-        np.testing.assert_almost_equal(self.p, total/repetitions, decimal=2)
+        np.testing.assert_almost_equal(0.1, total/repetitions, decimal=2)
