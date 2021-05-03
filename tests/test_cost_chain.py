@@ -5,6 +5,8 @@ import numpy as np
 
 class TestSmallCostChainEnv(unittest.TestCase):
     p = 0.1
+    horizon = 4
+    n = 3
 
     @classmethod
     def setUpClass(cls):
@@ -26,48 +28,54 @@ class TestSmallCostChainEnv(unittest.TestCase):
 
     def test_encode_decode(self):
         self.env.reset()
-        for i in range(6):
+        for i in range(2):
             self.assertEqual(i, self.env.encode(*list(self.env.decode(i))))
 
     def test_a(self):
         initial_state = self.env.reset()
-        self.assertIn(initial_state, [0, 1])
-        middle_state, _, _, _ = self.env.step(0)
-        final_state, reward, done, info = self.env.step(0)
-        if middle_state == 2:
-            self.assertEqual(reward, 0)
-        else:
-            self.assertEqual(middle_state, 3)
-            self.assertEqual(reward, 1)
-        self.assertEqual(info['cost'], 1)
-        self.assertFalse(done)
-        self.assertIn(final_state, [4, 5])
+        self.assertIn(initial_state, range(2))
+        for step in range(1, self.horizon - 1, 2):
+            state_odd_step, _, _, _ = self.env.step(0)
+            state_even_step, reward, done, info = self.env.step(0)
+            if state_odd_step % 2:
+                self.assertEqual(state_odd_step, 2 * step + 1)
+                self.assertEqual(reward, 1)
+            else:
+                self.assertEqual(reward, 0)
+            self.assertEqual(info['cost'], 1)
+            self.assertFalse(done)
+            self.assertIn(state_odd_step, [2 * step, 2 * step + 1])
+            self.assertIn(state_even_step, [2 * (step + 1), 2 * (step + 1) + 1])
         final_state, reward, done, info = self.env.step(0)
         self.assertTrue(done)
         self.assertEqual(reward, 0)
         self.assertEqual(info['cost'], 0)
-        self.assertIn(final_state, [4, 5])
+        self.assertIn(final_state, range(self.n * 2 - 2, self.n * 2))
 
     def test_b(self):
-        self.env.reset()
-        state, _, _, _ = self.env.step(0)
-        final_state, reward, done, info = self.env.step(1)
-        if state == 2:
-            self.assertEqual(reward, 1)
-        else:
-            self.assertEqual(reward, 0)
-        self.assertEqual(info['cost'], 0)
-        self.assertFalse(done)
-        self.assertIn(final_state, [4, 5])
+        initial_state = self.env.reset()
+        self.assertIn(initial_state, range(2))
+
+        for step in range(1, self.horizon - 1, 2):
+            state_odd_step, _, _, _ = self.env.step(0)
+            state_even_step, reward, done, info = self.env.step(1)
+            if state_odd_step % 2:
+                self.assertEqual(reward, 0)
+            else:
+                self.assertEqual(reward, 1)
+            self.assertEqual(info['cost'], 0)
+            self.assertFalse(done)
+            self.assertIn(state_odd_step, [2 * step, 2 * step + 1])
+            self.assertIn(state_even_step, [2 * (step + 1), 2 * (step + 1) + 1])
         final_state, reward, done, info = self.env.step(1)
         self.assertTrue(done)
         self.assertEqual(reward, 0)
         self.assertEqual(info['cost'], 0)
-        self.assertIn(final_state, [4, 5])
+        self.assertIn(final_state, range(self.n * 2 - 2, self.n * 2))
 
     def test_reset(self):
         initial_state = self.env.reset()
-        for _ in range(3):
+        for _ in range(self.horizon - 1):
             state, reward, done, info = self.env.step(2)
             self.assertEqual(list(self.env.decode(initial_state)), list(self.env.decode(state)))
             self.assertEqual(reward, 0)
@@ -96,3 +104,13 @@ class TestCostChain1Env(TestSmallCostChainEnv):
 
 class TestCostChain0Env(TestSmallCostChainEnv):
     p = 0
+
+
+class TestLongerCostChainEnv(TestSmallCostChainEnv):
+    horizon = 12
+    n = 11
+
+    @classmethod
+    def setUpClass(cls):
+        cls.p = np.random.random()
+        cls.env = gym.make("gym_factored:cost_chain-v0", prob_y_zero=cls.p, n=11)
