@@ -106,11 +106,11 @@ class TestCostChain0Env(TestSmallCostChainEnv):
     p = 0
 
 
-class TestLongerCostChainEnv(TestSmallCostChainEnv):
+class TestCostChainEnv(TestSmallCostChainEnv):
     horizon = 12
     n = 11
 
     @classmethod
     def setUpClass(cls):
         cls.p = np.random.random()
-        cls.env = gym.make("gym_factored:cost_chain-v0", prob_y_zero=cls.p, n=11)
+        cls.env = gym.make("gym_factored:cost_chain-v0", prob_y_zero=cls.p, n=cls.n)
