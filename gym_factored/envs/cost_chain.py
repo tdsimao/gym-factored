@@ -28,17 +28,17 @@ class CostChainEnv(DiscreteEnv):
             x, y = list(self.decode(s))
             for a in range(na):
                 if x == n-1:
-                    ns = s
-                    reward = 0
+                    suc = s
+                    reward = 1
                     done = True
                     cost = 0
-                    p[s][a].append((1, ns, reward, done, {'cost': cost}))
+                    p[s][a].append((1, suc, reward, done, {'cost': cost}))
                 elif a == RESET:
-                    ns = self.encode(0, y)
-                    reward = 0
+                    suc = self.encode(0, y)
+                    reward = 0.01
                     done = False
                     cost = 0
-                    p[s][a].append((1, ns, reward, done, {'cost': cost}))
+                    p[s][a].append((1, suc, reward, done, {'cost': cost}))
                 elif not (x % 2):
                     reward = 0
                     cost = 0
@@ -51,11 +51,11 @@ class CostChainEnv(DiscreteEnv):
                     cost = int(a == A)
                     done = False
                     if y == 0:
-                        reward = int(a == B)
+                        reward = int(a == B) * 0.01
                     else:
-                        reward = int(a == A)
-                    ns = self.encode(x + 1, y)
-                    p[s][a].append((1, ns, reward, done, {'cost': cost}))
+                        reward = int(a == A) * 0.01
+                    suc = self.encode(x + 1, y)
+                    p[s][a].append((1, suc, reward, done, {'cost': cost}))
         DiscreteEnv.__init__(self, ns, na, p, isd, domains=self.domains)
 
     def render(self, mode='human'):

@@ -39,7 +39,7 @@ class TestSmallCostChainEnv(unittest.TestCase):
             state_even_step, reward, done, info = self.env.step(0)
             if state_odd_step % 2:
                 self.assertEqual(state_odd_step, 2 * step + 1)
-                self.assertEqual(reward, 1)
+                self.assertEqual(reward, 0.01)
             else:
                 self.assertEqual(reward, 0)
             self.assertEqual(info['cost'], 1)
@@ -48,7 +48,7 @@ class TestSmallCostChainEnv(unittest.TestCase):
             self.assertIn(state_even_step, [2 * (step + 1), 2 * (step + 1) + 1])
         final_state, reward, done, info = self.env.step(0)
         self.assertTrue(done)
-        self.assertEqual(reward, 0)
+        self.assertEqual(reward, 1)
         self.assertEqual(info['cost'], 0)
         self.assertIn(final_state, range(self.n * 2 - 2, self.n * 2))
 
@@ -62,14 +62,14 @@ class TestSmallCostChainEnv(unittest.TestCase):
             if state_odd_step % 2:
                 self.assertEqual(reward, 0)
             else:
-                self.assertEqual(reward, 1)
+                self.assertEqual(reward, 0.01)
             self.assertEqual(info['cost'], 0)
             self.assertFalse(done)
             self.assertIn(state_odd_step, [2 * step, 2 * step + 1])
             self.assertIn(state_even_step, [2 * (step + 1), 2 * (step + 1) + 1])
         final_state, reward, done, info = self.env.step(1)
         self.assertTrue(done)
-        self.assertEqual(reward, 0)
+        self.assertEqual(reward, 1)
         self.assertEqual(info['cost'], 0)
         self.assertIn(final_state, range(self.n * 2 - 2, self.n * 2))
 
@@ -78,12 +78,12 @@ class TestSmallCostChainEnv(unittest.TestCase):
         for _ in range(self.horizon - 1):
             state, reward, done, info = self.env.step(2)
             self.assertEqual(list(self.env.decode(initial_state)), list(self.env.decode(state)))
-            self.assertEqual(reward, 0)
+            self.assertEqual(reward, 0.01)
             self.assertEqual(info['cost'], 0)
             self.assertFalse(done)
         final_state, reward, done, info = self.env.step(2)
         self.assertEqual(list(self.env.decode(initial_state)), list(self.env.decode(final_state)))
-        self.assertEqual(reward, 0)
+        self.assertEqual(reward, 0.01)
         self.assertEqual(info['cost'], 0)
         self.assertTrue(done)
 
