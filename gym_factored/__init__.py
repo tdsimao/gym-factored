@@ -127,7 +127,7 @@ register(
 
 register(
     id='small_cost_chain-v0',
-    max_episode_steps=6,
+    max_episode_steps=4,
     entry_point='gym_factored.envs.cost_chain:CostChainEnv',
     kwargs={
         'prob_y_zero': 0.1,

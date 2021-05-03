@@ -3,11 +3,12 @@ import gym
 import numpy as np
 
 
-class TestCostChainEnv(unittest.TestCase):
+class TestSmallCostChainEnv(unittest.TestCase):
+    p = 0.1
+
     @classmethod
     def setUpClass(cls):
-        cls.p = 0.1
-        cls.env = gym.make('gym_factored:small_cost_chain-v0')
+        cls.env = gym.make('gym_factored:small_cost_chain-v0', prob_y_zero=cls.p)
 
     def test_reset_env(self):
         ob = self.env.reset()
@@ -66,7 +67,7 @@ class TestCostChainEnv(unittest.TestCase):
 
     def test_reset(self):
         initial_state = self.env.reset()
-        for _ in range(5):
+        for _ in range(3):
             state, reward, done, info = self.env.step(2)
             self.assertEqual(list(self.env.decode(initial_state)), list(self.env.decode(state)))
             self.assertEqual(reward, 0)
@@ -89,15 +90,9 @@ class TestCostChainEnv(unittest.TestCase):
         np.testing.assert_almost_equal(self.p, total/repetitions, decimal=2)
 
 
-class TestCostChain1Env(TestCostChainEnv):
-    @classmethod
-    def setUpClass(cls):
-        cls.p = 1
-        cls.env = gym.make('gym_factored:small_cost_chain-v0', prob_y_zero=cls.p)
+class TestCostChain1Env(TestSmallCostChainEnv):
+    p = 1
 
 
-class TestCostChain0Env(TestCostChainEnv):
-    @classmethod
-    def setUpClass(cls):
-        cls.p = 0
-        cls.env = gym.make('gym_factored:small_cost_chain-v0', prob_y_zero=cls.p)
+class TestCostChain0Env(TestSmallCostChainEnv):
+    p = 0
