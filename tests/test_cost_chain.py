@@ -50,7 +50,7 @@ class TestSmallCostChainEnv(unittest.TestCase):
         self.assertTrue(done)
         self.assertEqual(reward, 1)
         self.assertEqual(info['cost'], 0)
-        self.assertIn(final_state, range(self.n * 2 - 2, self.n * 2))
+        self.assertIn(final_state, range(self.n * 2, self.n * 2 + 2))
 
     def test_b(self):
         initial_state = self.env.reset()
@@ -71,7 +71,7 @@ class TestSmallCostChainEnv(unittest.TestCase):
         self.assertTrue(done)
         self.assertEqual(reward, 1)
         self.assertEqual(info['cost'], 0)
-        self.assertIn(final_state, range(self.n * 2 - 2, self.n * 2))
+        self.assertIn(final_state, range(self.n * 2, self.n * 2 + 2))
 
     def test_reset(self):
         initial_state = self.env.reset()

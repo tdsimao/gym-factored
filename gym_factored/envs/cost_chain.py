@@ -17,8 +17,8 @@ class CostChainEnv(DiscreteEnv):
     """
 
     def __init__(self, prob_y_zero=0.1, n=3):
-        self.domains = [range(n), [0, 1]]
-        self.ns = ns = 2 * n
+        self.domains = [range(n + 1), [0, 1]]
+        self.ns = ns = 2 * (n + 1)
         na = 3
 
         isd = np.zeros(ns)
@@ -28,6 +28,18 @@ class CostChainEnv(DiscreteEnv):
             x, y = list(self.decode(s))
             for a in range(na):
                 if x == n-1:
+                    suc = self.encode(x + 1, y)
+                    reward = 1
+                    done = True
+                    cost = 0
+                    p[s][a].append((1, suc, reward, done, {'cost': cost}))
+                elif x == n:
+                    suc = s
+                    reward = 0
+                    done = True
+                    cost = 0
+                    p[s][a].append((1, suc, reward, done, {'cost': cost}))
+                elif x == n-1:
                     suc = s
                     reward = 1
                     done = True
