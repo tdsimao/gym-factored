@@ -47,7 +47,7 @@ class CostChainEnv(DiscreteEnv):
                     p[s][a].append((1, suc, reward, done, {'cost': cost}))
                 elif a == RESET:
                     suc = self.encode(0, y)
-                    reward = 0.01
+                    reward = 0.1
                     done = False
                     cost = 0
                     p[s][a].append((1, suc, reward, done, {'cost': cost}))
@@ -63,9 +63,9 @@ class CostChainEnv(DiscreteEnv):
                     cost = int(a == A)
                     done = False
                     if y == 0:
-                        reward = int(a == B) * 0.01
+                        reward = int(a == B) * 0.05
                     else:
-                        reward = int(a == A) * 0.01
+                        reward = int(a == A) * 0.05
                     suc = self.encode(x + 1, y)
                     p[s][a].append((1, suc, reward, done, {'cost': cost}))
         DiscreteEnv.__init__(self, ns, na, p, isd, domains=self.domains)
