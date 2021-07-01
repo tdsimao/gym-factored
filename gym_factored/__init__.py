@@ -136,11 +136,16 @@ register(
 )
 
 register(
-    id='cost_chain-v0',
-    max_episode_steps=12,
+    id='cost_chain_regular-v0',
     entry_point='gym_factored.envs.cost_chain:CostChainEnv',
+    max_episode_steps=12,
     kwargs={
         'prob_y_zero': 0.1,
         'n': 11
     },
+)
+
+register(
+    id='cost_chain-v0',
+    entry_point='gym_factored.envs.cost_chain:CostChainEnv',
 )
