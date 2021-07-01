@@ -16,7 +16,7 @@ class TestMakeEnvs(unittest.TestCase):
     def test_make_taxi(self):
         env = gym.make("gym_factored:taxi-fuel-v0")
         state = env.reset()
-        print(env.nS)
+        # print(env.nS)
         self.assertIn(state, range(8400))
 
     def test_make_taxi_map(self):
