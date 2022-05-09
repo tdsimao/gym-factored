@@ -9,9 +9,9 @@ git clone https://github.com/tdsimao/gym-factored.git
 pip install -e gym-factored
 ```
 
-Alternative;
+Alternative:
 ```bash
-pip install -e git+git@github.com:tdsimao/gym-factored.git#egg=gym_factored
+pip install git+https://github.com/tdsimao/gym-factored
 ```
 
 ### Tests
